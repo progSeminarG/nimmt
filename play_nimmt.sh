@@ -7,7 +7,7 @@ num_play=100
 ##### parameters #####
 workdir=$(pwd)
 
-timekey=nimmt
+timekey=$RANDOM
 
 ##### usage #####
 function usage_exit() {
@@ -15,7 +15,6 @@ cat << EOF
 Usage: $(echo $(basename $0)) [option] param
   param:  --out <file>: set output file
   option: --numplay <val>: set number of game (current: $num_play)
-          --timekey <key>: set timekey for stopwatch
           -f|--force  : allow overwrite
 EOF
 exit 1
@@ -23,7 +22,7 @@ exit 1
 set -e
 
 OPT=$(getopt -o f,h \
-              -l out:,numplay:,timekey:,force,help \
+              -l out:,numplay:,force,help \
               -- "$@")
 [ $? != 0 ] && usage_exit
 
@@ -32,7 +31,6 @@ while true; do
   case $1 in
     --out) outfile=$2; shift;;
     --numplay) num_play=$2; shift;;
-    --timekey) timekey=$2; shift;;
     -f|--force) flag_force=1;;
     -h|--help) usage_exit;;
     --) shift; break;;
