@@ -1,0 +1,80 @@
+#!/bin/sh
+
+source ~/.bashrc
+
+getoptver=$(getopt -V)
+if [[ $getoptver =~ '--' ]]; then
+cat << EOF
+ERROR:
+your getopt is BSD version
+this script need GNU version
+it is easy if you use homebrew
+just hit
+brew install gnu-getopt
+and link it in ~/.bashrc
+alias getopt='/usr/local/Cellar/gnu-getopt/1.1.6/bin/getopt'
+this script read your ~/.bashrc
+EOF
+fi
+
+##### parameters #####
+workdir=$(pwd)
+
+width=$(tput cols)
+
+mark="="
+##### usage #####
+function usage_exit() {
+cat << EOF
+Usage: $(echo $(basename $0)) [option] param
+  param:  -i|--istart  <int>: set starting index <int>
+          -f|--ifinish <int>: set finishing index <int>
+          -n|--inow    <int>: set currnet position index <int>
+	  --time       <key>: record time (using stopwatch)
+  option: --mark <mark>: fill progress bar with <mark> (default: $mark)
+EOF
+exit 1
+}
+set -e
+
+OPT=$(getopt -o i:,f:,n:,h \
+	     -l istart:,ifinish:,inow:,mark:,time:,help \
+             -- "$@")
+[ $? != 0 ] && usage_exit
+
+eval set -- "$OPT"
+while true; do
+  case $1 in
+    -i|--istart) istart=$2; shift;;
+    -f|--ifinish) ifinish=$2; shift;;
+    -n|--inow) inow=$2; shift;;
+    --mark) mark=$2; shift;;
+    --time) timer_key=$2; shift;;
+    -h|--help) usage_exit;;
+    --) shift; break;;
+  esac
+  shift
+done
+shift $(( OPTIND -1 ))
+
+if [[ -z $istart || -z $ifinish || -z $inow ]]; then usage_exit; fi
+
+if [[ -n $timer_key && $istart == $inow ]]; then sh stopwatch --start --key $timer_key; fi
+
+ratio=$(awk 'BEGIN{printf "%f", ('$inow'-'$istart')/('$ifinish'-'$istart')}')
+label=$(awk 'BEGIN{printf "%3d%",'$ratio'*100}' )
+numlabel=$(expr 3 + 3) #[100%]
+
+lengthbar=$(expr $width - $numlabel - 2)
+numfillbar=$(awk 'BEGIN{printf "%d", '$ratio'*'$lengthbar'}')
+
+#for _ in $(seq 1 $numfillbar); do
+for ((i=1;i<=$numfillbar;i++)); do
+  BAR="${BAR}$mark"
+done
+
+if [[ ! -z $BAR ]]; then
+  printf "\r[%-${lengthbar}s][%3s]" $BAR $label
+fi
+
+if [[ -n $timer_key && $inow == $ifinish ]]; then sh stopwatch --key $timer_key; fi
