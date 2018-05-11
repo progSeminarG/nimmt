@@ -191,12 +191,12 @@ from nimmt_Takai import TakaiAI
 
 ### create players ###
 player0 = TakahashiAI()
-player1 = HoizumiAI()
-player2 = SakuraiAI()
+player1 = SakuraiAI()
+player2 = HoizumiAI()
 player3 = TakaiAI()
 player4 = HiraiAI()
-player5 = ShiraiAI()
-player6 = KawadaAI()
+player5 = KawadaAI()
+player6 = ShiraiAI()
 player7 = Player()
 
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7]
