@@ -110,7 +110,7 @@ class OldHirai_AI(Player):
 #でかいカードはなるべく早めに切った方がいい
 #あまりにも小さすぎる数字のカード（例えば１とか２とか）は最後まで持っておいた方がよい
 #一番困るのはでかいカードを最後までもっていた場合である。最終的に列を引き取ることになるから損害はかなりでかい。
-class Hirai_AI(Player):
+class HiraiAI(Player):
     def get_know_dealer(self,dealer_input): # ディーラーのインスタンスを得る
         self.dealer = dealer_input
     def get_hand(self,my_cards_input): # ディーラー側で呼んで、手札を得る
