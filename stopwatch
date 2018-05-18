@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ~/.bashrc
+alias getopt="$(brew --prefix gnu-getopt)/bin/getopt"
 
 ##### parameters #####
 workdir=$(pwd)
