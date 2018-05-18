@@ -41,7 +41,7 @@ shift $(( OPTIND -1 ))
 
 ##### error handling #####
 if [[ -z $outfile ]]; then
-  echo "set output file"
+  echo "ERROR: set output file"
   usage_exit
 fi
 if [[ -f $outfile ]]; then

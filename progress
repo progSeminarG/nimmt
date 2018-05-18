@@ -59,6 +59,8 @@ shift $(( OPTIND -1 ))
 
 if [[ -z $istart || -z $ifinish || -z $inow ]]; then usage_exit; fi
 
+if [[ $istart == $ifinish ]]; then exit 0; fi
+
 if [[ -n $timer_key && $istart == $inow ]]; then sh stopwatch --start --key $timer_key; fi
 
 ratio=$(awk 'BEGIN{printf "%f", ('$inow'-'$istart')/('$ifinish'-'$istart')}')
