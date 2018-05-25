@@ -157,19 +157,22 @@ class Card(object):
                 + self.__num_cards_column[self.__column]
     @property
     def number(self):
-        return self.__number
+        return self.__number #1,..,104
     @property
     def category(self):
-        return sefl.__category
+        return sefl.__category #'l'ow,'h'igh
     @property
     def column(self):
-        return self.__column
+        return self.__column #None, 0,..,3
+    @property
+    def left_neighbor(self):
+        return self.__left_neighbor #None, 1,..,103
     @property
     def right_neighbor(self):
-        return self.__right_neighbor
+        return self.__right_neighbor #None, 2,..,104
     @property
     def position(self):
-        return self.__position
+        return self.__position #None, 1,.. (most left card's index is 0)
 
 
 class TakahashiAI(Player):
