@@ -188,6 +188,7 @@ from nimmt_Hoizumi import HoizumiAI
 from nimmt_Kawada import KawadaAI
 from nimmt_Shirai import ShiraiAI
 from nimmt_Takai import TakaiAI
+from nimmt_Kikuchi import KikuchiAI
 
 ### create players ###
 player0 = TakahashiAI()
@@ -197,9 +198,10 @@ player3 = TakaiAI()
 player4 = HiraiAI()
 player5 = KawadaAI()
 player6 = ShiraiAI()
-player7 = Player()
+player7 = KikuchiAI()
+player8 = Player()
 
-players_list = [player0, player1, player2, player3, player4, player5, player6, player7]
+players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
 ### game start ###
 SCORE_THRESH = 66
