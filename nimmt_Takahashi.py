@@ -180,12 +180,13 @@ class TakahashiAI(Player):
     def get_know_dealer(self,dealer_input):
         self.__dealer = dealer_input
         self.__num_field = self.__dealer.num_field # 4
+        self.__max_card = self.__dealer.max_card # 104
         self.__num_hand = self.__dealer.num_hand # 10
         self.__num_max_column = self.__dealer.num_max_column # 5
         self.__num_players = self.__dealer.num_players
         self.__unknown_cards = [
                 i+1
-                for i in range(self.__num_field+self.__num_hand*self.__num_players)
+                for i in range(self.__max_card)
                 ]
         self.__field_inst = Field(self.__dealer)
         self.__field = self.__field_inst.field
