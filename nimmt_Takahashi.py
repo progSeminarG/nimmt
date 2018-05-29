@@ -3,6 +3,7 @@
 import random
 import sys
 import copy
+from itertools import chain
 
 ### 基本 Player クラス (みんなこれを使えば良い) ###
 class Player(object):
@@ -190,14 +191,14 @@ class TakahashiAI(Player):
                 ]
         self.__field_inst = Field(self.__dealer)
         self.__field = self.__field_inst.field
-        self.__update_unknown_cards([flatten for inner in self.__field for flatten in inner])
+        self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
 
     def get_hand(self,my_cards_input):
         self.__my_cards = my_cards_input
         self.__my_cards.sort(reverse=True)
         self.__my_original_cards = copy.deepcopy(self.__my_cards)
         self.__update_unknown_cards(self.__my_cards)
-        my_cards_inst = [
+        self.__my_cards_inst = [
                 Card(self.__my_cards[i],self.__field_inst,self.__unknown_cards)
                 for i in range(len(self.__my_cards))
                 ]
@@ -205,7 +206,7 @@ class TakahashiAI(Player):
     def put_card(self):
         self.get_field()
         self.__field_inst.update(field=self.__field)
-        self.__update_unknown_cards([flatten for inner in self.__field for flatten in inner])
+        self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
         _num_try = 100
         self.__score_for_my_cards = []
         for _card in self.__my_cards:
@@ -306,7 +307,7 @@ class TakahashiAI(Player):
 
     def get_field(self): # 場の状況を得る
         self.__field = self.__dealer.field
-        self.__update_unknown_cards([flatten for inner in self.__field for flatten in inner])
+        self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
 
     def _min_field_score_column(self):
         _field_score = self.__get_field_score(self.__field)
