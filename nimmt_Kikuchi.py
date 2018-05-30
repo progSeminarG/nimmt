@@ -23,8 +23,25 @@ class Player(object):
 class KikuchiAI(Player):
 
 	def put_card(self):
-		#一番小さなカードを出す
-		_putting_card = min(self.my_cards)
+
+		#場より大きくかつ手札の中で一番小さい数を出す
+		#なかったら適当に
+
+		sorted(self.my_cards)
+
+		_putting_card = 0
+
+		for i in range(len(self.my_cards)):
+			for j in range(4):
+				if self.dealer.field[j][-1] < self.my_cards[i]:
+					_putting_card = self.my_cards[i]
+					break
+			else:
+				continue
+			break
+
+		_putting_card = random.choice(self.my_cards)
+
 		self.my_cards.remove(_putting_card)
 		return _putting_card
 	
