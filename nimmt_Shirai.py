@@ -1,5 +1,5 @@
 #!/usr/local/bin/python3
-# coding: UTF-8
+#coding:UTF-8
 
 import random
 
@@ -14,37 +14,46 @@ class Player(object):
         return self.my_cards.pop(0)
     def taking_column(self): # 一番小さい数を出したときにディーラー側で呼んで、どの列を引き取るか知らせる
         return 0
-        
+
     def get_field(self): # 場の状況を得る
         self.field = self.dealer.field
 
 
-### 継承クラス (ここで基本クラスを継承して、様々な処理を行う) ###
+#継承クラス (ここで基本クラスを継承して、様々な処理を行う) version1.1
+#牛の少ない列を戻す，差が1のところに置く
 
 class ShiraiAI(Player):
-	
     def put_card(self):
-    	print("cards",self.my_cards)
-    	for i in range(4):
-    		for k in range(len(self.my_cards)):
-    			if self.my_cards[k]-self.dealer.field[i][len(self.dealer.field[i])-1]==1 and len(self.dealer.field[i])<5 :
-    				print("1")
-    				chose=self.my_cards[k]
-    				self.my_cards.remove(chose)
-    				return chose
-    				break
-    			else:
-    				print("2")
-    				i=random.sample(range(len(self.my_cards)),1)[0]
-    				chose=self.my_cards[i]
-    				print("chose",chose)
-    				self.my_cards.remove(chose)
-    				return chose
-    				break
+        self.my_cards.sort()
+        fb=200
+        print("field",self.dealer.field)
+        print("cards",self.my_cards)
+        for i in range(4):
+    	    for k in range(len(self.my_cards)): #全てのカードと列の最大値との差を計算し1なら返す
+    		    if self.my_cards[k]-self.dealer.field[i][len(self.dealer.field[i])-1]==1 and len(self.dealer.field[i])<5 :
+    			    chose=self.my_cards[k]
+    			    self.my_cards.remove(chose)
+    			    return chose
+    			    
+    	    if len(self.dealer.field[i])==5:
+    	        if fb > self.dealer.field[i][len(self.dealer.field[i])-1]:
+    	            fb = self.dealer.field[i][len(self.dealer.field[i])-1]
+        if self.my_cards[0] > fb:
+            t = random.sample(range(len(self.my_cards)),1)[0]
+            chose = self.my_cards[t]
+            self.my_cards.remove(chose)
+            return chose
+        else:
+            s=0
+            while self.my_cards[s] < fb and s<len(self.my_cards)-1:
+                s+=1
+                print("s:",s)
+            
+            chose = self.my_cards[s]
+            self.my_cards.remove(chose)
+            return chose
+            
 
-    				
-    						
-    	
     def taking_column(self):#chose min(caw)
         caw=[0,0,0,0]
         for i in range(4):
