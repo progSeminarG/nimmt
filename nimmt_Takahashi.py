@@ -4,6 +4,8 @@ import random
 import sys
 import copy
 from itertools import chain
+from math import factorial, ceil, floor
+from scipy.misc import comb
 
 ### 基本 Player クラス (みんなこれを使えば良い) ###
 class Player(object):
@@ -147,21 +149,65 @@ class Card(object):
             self.__column = None # putting column
             self.__right_neighbor = _local_sequence[_index+1]
             self.__position = None
+            self.__num_space = None
+            self.__prior_cards = []
         else:
             self.__category = 'h' # high category
-            self.__left_neighbor = _local_sequence[_index-1]
+            self.__left_neighbor = _local_sequence[_index-1] # field value of the putting column
             self.__column = self.__most_right_field.index(self.__left_neighbor) # putting column
             self.__right_neighbor = self.__max_card+1 if _index == self.__num_field else _local_sequence[_index+1]
             _local_sequence = sorted(self.__unknown_cards + [self.__left_neighbor] + [self.__number])
-            self.__position = _local_sequence.index(self.__number) \
-                - _local_sequence.index(self.__left_neighbor) \
-                + self.__num_cards_column[self.__column]
+            _left_position_lseq = _local_sequence.index(self.__left_neighbor)
+            _my_position_lseq = _local_sequence.index(self.__number)
+            self.__position = _my_position_lseq \
+                - _left_position_lseq \
+                + self.__num_cards_column[self.__column] -1
+            print("num_max_column:",self.__num_max_column)
+            print("self.__num_cards_column:",self.__num_cards_column[self.__column])
+            self.__num_space = self.__num_max_column - self.__num_cards_column[self.__column]
+            self.__prior_cards = copy.deepcopy(_local_sequence[_left_position_lseq+1:_my_position_lseq])
+            print("me:",self.__number)
+            print("unknown:",self.__unknown_cards)
+            print("field:",self.__field_inst.field)
+            print("prior:",self.__prior_cards)
+            print("category:", self.__category)
+            print("column:", self.__column)
+            print("position:", self.__position)
+            #sys.exit(1)
+
+    @staticmethod
+    def get_score(_num):
+        def _bool_same_digit(num):
+            if int(num/10) == 0:
+                return False
+            else:
+                _1st_digit = int(num%10)
+                while True:
+                    num = int(num/10)
+                    if num == 0:
+                        break
+                    if _1st_digit != int(num%10):
+                        return False
+                return True
+        if _bool_same_digit(_num):
+            if _num % 5 == 0:
+                return 7
+            else:
+                return 5
+        elif _num % 10 == 0:
+            return 3
+        elif _num % 5 == 0:
+            return 2
+        else:
+            return 1
+
+
     @property
     def number(self):
         return self.__number #1,..,104
     @property
     def category(self):
-        return sefl.__category #'l'ow,'h'igh
+        return self.__category #'l'ow,'h'igh
     @property
     def column(self):
         return self.__column #None, 0,..,3
@@ -174,6 +220,12 @@ class Card(object):
     @property
     def position(self):
         return self.__position #None, 1,.. (most left card's index is 0)
+    @property
+    def num_space(self):
+        return self.__num_space #None, 4, 3, 2, 1, 0
+    @property
+    def prior_cards(self):
+        return self.__prior_cards #list of possible inserting cards
 
 
 class TakahashiAI(Player):
@@ -207,13 +259,81 @@ class TakahashiAI(Player):
         self.get_field()
         self.__field_inst.update(field=self.__field)
         self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
+#        print(self.__get_probability(2,2,2,4,2))
         _num_try = 100
-        self.__score_for_my_cards = []
+        print(self.__get_score_ordered_list(self.__unknown_cards))
+        print("insert prob:",self.__get_insert_prob())
+        sys.exit(1)
+        return self.__put_card_by_demo(_num_try)
+
+    def __put_card_by_demo(self,num_try):
+        _score_for_my_cards = []
         for _card in self.__my_cards:
-            _score_summed = self.__play_random_pack(_card,_num_try)
-            self.__score_for_my_cards.append(_score_summed)
-        _min_index = self.__score_for_my_cards.index(min(self.__score_for_my_cards))
+            _score_summed = self.__play_random_pack(_card,num_try)
+            _score_for_my_cards.append(_score_summed)
+        _min_index = _score_for_my_cards.index(min(_score_for_my_cards))
         return self.__my_cards.pop(_min_index)
+
+    def __get_probability(self,_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards):
+        _nfact = factorial(_num_each_cards)
+        _num_more = _num_pick_cards%_num_players
+        print("#####")
+        print(_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards)
+        print(float(_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players)))**(_num_more))
+#        print("in 1:",_nfact,_num_each_cards,ceil(_num_pick_cards/_num_players),_num_more)
+        print(float(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players)))**(_num_players-_num_more))
+        print(comb(_num_key_cards,_num_pick_cards))
+        print(float(factorial(_num_pick_cards)))
+        print(float(factorial(_num_all_cards-_num_pick_cards)/factorial(_num_all_cards-_num_each_cards*_num_players)))
+        print(comb(_num_players,_num_more))
+        print(float(factorial(_num_all_cards)))
+        print("prob:",_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players))**(_num_more)*(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players)))**(_num_players-_num_more)*comb(_num_key_cards,_num_pick_cards)*factorial(_num_pick_cards)*factorial(_num_all_cards-_num_pick_cards)/factorial(_num_all_cards-_num_each_cards*_num_players)*comb(_num_players,_num_more)/factorial(_num_all_cards))
+
+
+        print("####/")
+        return (_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players))) \
+                **(_num_more) \
+                *(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players))) \
+                **(_num_players-_num_more) \
+                *comb(_num_key_cards,_num_pick_cards) \
+                *factorial(_num_pick_cards) \
+                *factorial(_num_all_cards-_num_pick_cards) \
+                /factorial(_num_all_cards-_num_each_cards*_num_players) \
+                *comb(_num_players,_num_more) \
+                /factorial(_num_all_cards)
+
+
+    def __get_score_ordered_list(self,_list_of_cards):
+        _score = [Card.get_score(i) for i in _list_of_cards]
+        return sorted(_list_of_cards,key=lambda card:_score[_list_of_cards.index(card)],reverse=True)
+
+    def __get_insert_prob(self):
+        _insert_prob_list = []
+        _num_each_cards = len(self.__my_cards_inst)
+        _num_players = self.__num_players -1
+        _num_all_cards = len(self.__unknown_cards)
+        for card in self.__my_cards_inst:
+            if card.category is 'h':
+                print("prior_cards:",card.prior_cards)
+                _num_key_cards = len(card.prior_cards)
+                _num_pick_cards = card.num_space
+#                _num_pick_cards = _num_key_cards
+                print("n:",_num_each_cards)
+                print("l:",_num_pick_cards)
+                print("s:",_num_players)
+                print("N:",_num_all_cards)
+                print("m:",_num_key_cards)
+                _insert_prob_list.append(self.__get_probability(_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards))
+            else:
+                _insert_prob_list.append(None)
+        print("cards:",self.__my_cards)
+        print("prob:",_insert_prob_list)
+        print("field:",self.__field)
+        print("unknown:",self.__unknown_cards)
+        sys.exit(1)
+        return _insert_prob_list
+
+
 
     def __play_random_pack(self,_my_card,_num_play):
         _ged_earned_score_sum = [0]*self.__num_players
