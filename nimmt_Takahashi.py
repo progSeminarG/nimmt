@@ -330,9 +330,21 @@ class TakahashiAI(Player):
         print("prob:",_insert_prob_list)
         print("field:",self.__field)
         print("unknown:",self.__unknown_cards)
+
         sys.exit(1)
         return _insert_prob_list
 
+
+    def __shift(self,_list_input):
+        _list = copy.deepcopy(_list_input)
+        _num_list = len(_list)
+        for k in range(_num_list)[::-1]:
+            if _list[k] > 1:
+                _list[k] = _list[k]-1
+                for l in range(k+1,_num_list):
+                    if _list[l] < _list[k]:
+                        _list[l] = _list[l]+1
+                        return _list
 
 
     def __play_random_pack(self,_my_card,_num_play):
