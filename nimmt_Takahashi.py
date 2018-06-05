@@ -331,11 +331,70 @@ class TakahashiAI(Player):
         print("field:",self.__field)
         print("unknown:",self.__unknown_cards)
 
+        mylist = [6,0,0,0,0,0]
+        for i in range(8):
+            print("mylist:",i,mylist)
+            mylist = self.__shift(mylist)
+
+        _list_of_list_of_tuple = self.__make_tuple(5,5)
+        self.__break_tuple(_list_of_list_of_tuple,5)
+        for i in _list_of_list_of_tuple:
+            print(i)
+
+        print("##### check __mek_rest_tuple")
+        print(self.__make_tuple(7,2))
+
         sys.exit(1)
         return _insert_prob_list
 
+    def __break_tuple(self,_list_of_list_of_tuple,_num):
+        _current_list = copy.deepcopy(_list_of_list_of_tuple[-1]) # only the last one will be revised
+        for _tuple in _current_list[::-1]:
+            _current_list.remove(_tuple)
+            if _tuple[0] > 1:
+                _new_num_value = _tuple[0] -1
+                if _tuple[1] > 1:
+                    _new_num_people = _tuple[1]-1
+                    _rest_num = _num - _tuple[0] * _new_num_people
+                    _new_list_of_tuple = self.__make_tuple(_rest_num,_new_num_value)
+                    _current_list += _new_list_of_tuple
+                    _list_of_list_of_tuple.append(_current_list)
+                else:
+                    _rest_num = _num - self.__sum_tuple(_current_list)
+                    _new_num_people = int(_rest_num / _new_num_value)
+                    if _new_num_people > 1:
+                        _current_list.append((_new_num_value,_new_num_people))
+                        _rest_num -= _new_num_value * _new_num_people
+                        if _rest_num == 0:
+                            _list_of_list_of_tuple.append(_current_list)
+                            self.__break_tuple(_list_of_list_of_tuple,_num)
+                        else:
+                            _current_list += self.__make_tuple(_rest_num,_new_num_value-1)
+                            _list_of_list_of_tuple.append(_current_list)
+                        if _list_of_list_of_tuple[-1][0][0] != 1:
+                            self.__break_tuple(_list_of_list_of_tuple,_num)
 
-    def __shift(self,_list_input):
+
+    def __make_tuple(self,_total,_num_init):
+        _tuple_list = []
+        for _num in range(_num_init,0,-1):
+            _num_people = int(_total / _num)
+            if _num_people > 0:
+                _total -= _num * _num_people
+                _tuple_list.append((_num,_num_people))
+                if _total == 0:
+                    return _tuple_list
+
+
+
+    def __sum_tuple(self,_list_of_tuple):
+        _sum = 0
+        for _tuple in _list_of_tuple:
+            _sum += _tuple[0]*_tuple[1]
+        return _sum
+
+
+    def __shift(self,_list_input): #bug: ex) for 6, [2,2,2,0,0,0] can't be detected
         _list = copy.deepcopy(_list_input)
         _num_list = len(_list)
         for k in range(_num_list)[::-1]:
