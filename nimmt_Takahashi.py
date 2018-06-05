@@ -331,21 +331,50 @@ class TakahashiAI(Player):
         print("field:",self.__field)
         print("unknown:",self.__unknown_cards)
 
-        mylist = [6,0,0,0,0,0]
-        for i in range(8):
-            print("mylist:",i,mylist)
-            mylist = self.__shift(mylist)
+#        mylist = [6,0,0,0,0,0]
+#        for i in range(8):
+#            print("mylist:",i,mylist)
+#            mylist = self.__shift(mylist)
 
-        _list_of_list_of_tuple = [self.__make_tuple(7,7)]
-        self.__break_tuple(_list_of_list_of_tuple,7)
-        for i in _list_of_list_of_tuple:
-            print(i)
+#        _list_of_list_of_tuple = [self.__make_tuple(7,7)]
+#        self.__break_tuple(_list_of_list_of_tuple,7)
+#        for i in _list_of_list_of_tuple:
+#            print(i)
 
 #        print("##### check __mek_rest_tuple")
 #        print(self.__make_tuple(7,2))
 
+        
+        print("probability2:",self.__get_probability2())
+
         sys.exit(1)
         return _insert_prob_list
+
+    # calc probability
+    # _N: total number of cards
+    # _n: number of cards each player has
+    # _s: number of playter
+    # _m: total number of key cards
+    # _l: number of key cards to be distributed
+    def __get_probability2(self,_N,_n,_s,_m,_l):
+        def perm(_n,_r):
+            return comb(_n,_r)*factorial(_r)
+        def prod(_n,_s,_list_of_combination):
+            _prod = 1
+            _ss = _s
+            for _tuple in _list_of_combination:
+                _prod *= perm(_n,_tuple[0])**_tuple[1]
+                _prod *= comb(_ss,_tuple[0])
+                _ss -= _tuple[0]
+            return _prod
+        _prob = 0.0
+        for _mp in range(_l,_m+1):
+            for _lp in range(_l,_mp+1):
+                _pattern = [self.__make_tuple(_mp,_mp)]
+                self.__break_tuple(_pattern,_mp)
+                _prob += prod(_n,_s,_pattern) * perm(_m,_mp) * perm(_N-_m,_n*_s-_mp)
+        _prob /= perm(_N,_n*_s)
+        return _prob
 
     def __break_tuple(self,_list_of_list_of_tuple,_num):
         if _list_of_list_of_tuple[-1] != [(1,_num)]:
@@ -363,7 +392,6 @@ class TakahashiAI(Player):
                     self.__break_tuple(_list_of_list_of_tuple,_num)
                     break
 
-
     def __make_tuple(self,_total,_num_init):
         _tuple_list = []
         for _num in range(_num_init,0,-1):
@@ -374,15 +402,13 @@ class TakahashiAI(Player):
                 if _total == 0:
                     return _tuple_list
 
-
-
     def __sum_tuple(self,_list_of_tuple):
         _sum = 0
         for _tuple in _list_of_tuple:
             _sum += _tuple[0]*_tuple[1]
         return _sum
 
-
+    # given _list_input re-distributed
     def __shift(self,_list_input): #bug: ex) for 6, [2,2,2,0,0,0] can't be detected
         _list = copy.deepcopy(_list_input)
         _num_list = len(_list)
@@ -393,7 +419,6 @@ class TakahashiAI(Player):
                     if _list[l] < _list[k]:
                         _list[l] = _list[l]+1
                         return _list
-
 
     def __play_random_pack(self,_my_card,_num_play):
         _ged_earned_score_sum = [0]*self.__num_players
