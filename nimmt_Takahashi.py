@@ -382,6 +382,8 @@ class TakahashiAI(Player):
 
     def __create_pattern(self,_mp,_lp):
         _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,_mp-_lp)]
+        if _list_of_list_of_pattern == [[]]:
+            _list_of_list_of_pattern = [[(0,_lp)]]
         print("_list_of_list_of_pattern:",_list_of_list_of_pattern)
         self.__break_tuple(_list_of_list_of_pattern,_mp-_lp)
         for _list_of_tuple in _list_of_list_of_pattern:
