@@ -345,7 +345,7 @@ class TakahashiAI(Player):
 #        print(self.__make_tuple(7,2))
 
         
-        print("probability2:",self.__get_probability2())
+        print("probability2:",self.__get_probability2(12,3,4,3,3))
 
         sys.exit(1)
         return _insert_prob_list
@@ -358,7 +358,7 @@ class TakahashiAI(Player):
     # _l: number of key cards to be distributed
     def __get_probability2(self,_N,_n,_s,_m,_l):
         def perm(_n,_r):
-            return comb(_n,_r)*factorial(_r)
+            return factorial(_n)/factorial(_n-_r) #comb(_n,_r)*factorial(_r)
         def prod(_n,_s,_list_of_combination):
             _prod = 1
             _ss = _s
@@ -367,14 +367,27 @@ class TakahashiAI(Player):
                 _prod *= comb(_ss,_tuple[0])
                 _ss -= _tuple[0]
             return _prod
-        _prob = 0.0
-        for _mp in range(_l,_m+1):
-            for _lp in range(_l,_mp+1):
-                _pattern = [self.__make_tuple(_mp,_mp)]
-                self.__break_tuple(_pattern,_mp)
-                _prob += prod(_n,_s,_pattern) * perm(_m,_mp) * perm(_N-_m,_n*_s-_mp)
-        _prob /= perm(_N,_n*_s)
-        return _prob
+        _probability = 0.0
+        for _mp in range(_l,_m+1): # number of distributing key cards
+            for _lp in range(_l,_mp+1): # number of people 
+#                _list_of_list_of_pattern = [self.__make_tuple(_mp,_mp)]
+#                self.__break_tuple(_list_of_list_of_pattern,_mp)
+                _list_of_list_of_pattern = self.__create_pattern(_mp,_lp)
+                print("for _mp, _lp, pattern:",_mp,_lp,_list_of_list_of_pattern)
+                for _list_of_pattern in _list_of_list_of_pattern:
+                    _probability += prod(_n,_s,_list_of_pattern) * perm(_m,_mp) * perm(_N-_m,_n*_s-_mp) / perm(_N,_n*_s)
+                    print("_list_of_pattern,prob:",_list_of_pattern,_probability)
+#        _probability /= perm(_N,_n*_s)
+        return _probability
+
+    def __create_pattern(self,_mp,_lp):
+        _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,_mp-_lp)]
+        print("_list_of_list_of_pattern:",_list_of_list_of_pattern)
+        self.__break_tuple(_list_of_list_of_pattern,_mp-_lp)
+        for _list_of_tuple in _list_of_list_of_pattern:
+            for i in range(len(_list_of_tuple)):
+                _list_of_tuple[i] = (_list_of_tuple[i][0]+1,_list_of_tuple[i][1])
+        return _list_of_list_of_pattern
 
     def __break_tuple(self,_list_of_list_of_tuple,_num):
         if _list_of_list_of_tuple[-1] != [(1,_num)]:
@@ -393,6 +406,7 @@ class TakahashiAI(Player):
                     break
 
     def __make_tuple(self,_total,_num_init):
+        print("in __make_tuple:",_total,_num_init)
         _tuple_list = []
         for _num in range(_num_init,0,-1):
             _num_people = int(_total / _num)
@@ -401,6 +415,17 @@ class TakahashiAI(Player):
                 _tuple_list.append((_num,_num_people))
                 if _total == 0:
                     return _tuple_list
+        return _tuple_list # case _total==0, _num_init==0
+
+    def __count_num_player(self,_list_of_tuple):
+        _sum = 0
+        for _tuple in _list_of_tuple:
+            _sum += _tuple[1]
+        return _sum
+
+    def __init_tuple(self,_total,_n,_min_player):
+        pass
+
 
     def __sum_tuple(self,_list_of_tuple):
         _sum = 0
