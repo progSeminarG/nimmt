@@ -345,7 +345,7 @@ class TakahashiAI(Player):
 #        print(self.__make_tuple(7,2))
 
         
-        print("probability2:",self.__get_probability2(12,3,4,3,3))
+        print("probability2:",self.__get_probability2(30,3,4,5,3))
 
         sys.exit(1)
         return _insert_prob_list
@@ -398,6 +398,7 @@ class TakahashiAI(Player):
                 _list_of_tuple[i] = (_list_of_tuple[i][0]+1,_list_of_tuple[i][1])
         return _list_of_list_of_pattern
 
+    # create list of list of tuples with total _num numbers of cards to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_num):
         if _list_of_list_of_tuple[-1] != [(1,_num)]:
             _current_list = copy.deepcopy(_list_of_list_of_tuple[-1]) # only the last one will be revised
@@ -414,6 +415,7 @@ class TakahashiAI(Player):
                     self.__break_tuple(_list_of_list_of_tuple,_num)
                     break
 
+    # create list of tuple with _total number with _num_init as minimum number of cards
     def __make_tuple(self,_total,_num_init):
         print("in __make_tuple:",_total,_num_init)
         _tuple_list = []
@@ -426,33 +428,32 @@ class TakahashiAI(Player):
                     return _tuple_list
         return _tuple_list # case _total==0, _num_init==0
 
-    def __count_num_player(self,_list_of_tuple):
-        _sum = 0
-        for _tuple in _list_of_tuple:
-            _sum += _tuple[1]
-        return _sum
+#    # obsolete
+#    def __count_num_player(self,_list_of_tuple):
+#        _sum = 0
+#        for _tuple in _list_of_tuple:
+#            _sum += _tuple[1]
+#        return _sum
 
-    def __init_tuple(self,_total,_n,_min_player):
-        pass
-
-
+    # calculate total number of cards
     def __sum_tuple(self,_list_of_tuple):
         _sum = 0
         for _tuple in _list_of_tuple:
             _sum += _tuple[0]*_tuple[1]
         return _sum
 
-    # given _list_input re-distributed
-    def __shift(self,_list_input): #bug: ex) for 6, [2,2,2,0,0,0] can't be detected
-        _list = copy.deepcopy(_list_input)
-        _num_list = len(_list)
-        for k in range(_num_list)[::-1]:
-            if _list[k] > 1:
-                _list[k] = _list[k]-1
-                for l in range(k+1,_num_list):
-                    if _list[l] < _list[k]:
-                        _list[l] = _list[l]+1
-                        return _list
+#    # obsolete
+#    # given _list_input re-distributed
+#    def __shift(self,_list_input): #bug: ex) for 6, [2,2,2,0,0,0] can't be detected
+#        _list = copy.deepcopy(_list_input)
+#        _num_list = len(_list)
+#        for k in range(_num_list)[::-1]:
+#            if _list[k] > 1:
+#                _list[k] = _list[k]-1
+#                for l in range(k+1,_num_list):
+#                    if _list[l] < _list[k]:
+#                        _list[l] = _list[l]+1
+#                        return _list
 
     def __play_random_pack(self,_my_card,_num_play):
         _ged_earned_score_sum = [0]*self.__num_players
