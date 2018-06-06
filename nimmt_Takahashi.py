@@ -373,7 +373,7 @@ class TakahashiAI(Player):
             for _lp in range(_l,_mp+1): # number of people 
 #                _list_of_list_of_pattern = [self.__make_tuple(_mp,_mp)]
 #                self.__break_tuple(_list_of_list_of_pattern,_mp)
-                _list_of_list_of_pattern = self.__create_pattern(_mp,_lp)
+                _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
                 print("for _mp, _lp, pattern:",_mp,_lp,_list_of_list_of_pattern)
                 for _list_of_pattern in _list_of_list_of_pattern:
                     print("@_list_of_pattern:",_list_of_pattern)
@@ -387,32 +387,40 @@ class TakahashiAI(Player):
 #        _probability /= perm(_N,_n*_s)
         return _probability
 
-    def __create_pattern(self,_mp,_lp):
+    # create all possible pattern for
+    # _n:  number of cards one is honded out
+    # _mp: number of cards to hand out
+    # _lp: numbef of people who has key cards
+    def __create_pattern(self,_n,_mp,_lp):
         _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,_mp-_lp)]
         if _list_of_list_of_pattern == [[]]:
             _list_of_list_of_pattern = [[(0,_lp)]]
         print("_list_of_list_of_pattern:",_list_of_list_of_pattern)
-        self.__break_tuple(_list_of_list_of_pattern,_mp-_lp)
+        self.__break_tuple(_list_of_list_of_pattern,_n,_mp,_lp)
+        return _list_of_list_of_pattern
+
+    # create list of list of tuples with total _num numbers of cards to distribute
+    def __break_tuple(self,_list_of_list_of_pattern,_n,_mp,_lp):
+        self.__break_tuple_core(_list_of_list_of_pattern,_mp-_lp,_n,_lp)
         for _list_of_tuple in _list_of_list_of_pattern:
             for i in range(len(_list_of_tuple)):
                 _list_of_tuple[i] = (_list_of_tuple[i][0]+1,_list_of_tuple[i][1])
         return _list_of_list_of_pattern
 
-    # create list of list of tuples with total _num numbers of cards to distribute
-    def __break_tuple(self,_list_of_list_of_tuple,_num):
+    def __break_tuple_core(self,_list_of_list_of_tuple,_num,_n,_lp):
         if _list_of_list_of_tuple[-1] != [(1,_num)]:
             _current_list = copy.deepcopy(_list_of_list_of_tuple[-1]) # only the last one will be revised
             for _tuple in _current_list[::-1]:
                 _current_list.remove(_tuple)
                 if _tuple[0] > 1: # (x>1,*)
                     _new_num_value = _tuple[0]
-                    if _tuple[1] > 1: # (x,y>1) y -> y-1
+                    if _tuple[1] > 1 and _tuple[1] <= _lp: # (x,y>1) y -> y-1
                         _new_num_people = _tuple[1] -1
                         _current_list.append((_new_num_value,_new_num_people))
                     _rest_num = _num - self.__sum_tuple(_current_list)
                     _current_list += self.__make_tuple(_rest_num,_new_num_value-1)
                     _list_of_list_of_tuple.append(_current_list)
-                    self.__break_tuple(_list_of_list_of_tuple,_num)
+                    self.__break_tuple_core(_list_of_list_of_tuple,_num,_n,_lp)
                     break
 
     # create list of tuple with _total number with _num_init as minimum number of cards
