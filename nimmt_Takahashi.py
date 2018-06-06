@@ -366,6 +366,7 @@ class TakahashiAI(Player):
                 _prod *= perm(_n,_tuple[0])**_tuple[1]
                 _prod *= comb(_ss,_tuple[0])
                 _ss -= _tuple[0]
+                print("@_prod",perm(_n,_tuple[0])**_tuple[1],comb(_ss,_tuple[0]))
             return _prod
         _probability = 0.0
         for _mp in range(_l,_m+1): # number of distributing key cards
@@ -375,7 +376,13 @@ class TakahashiAI(Player):
                 _list_of_list_of_pattern = self.__create_pattern(_mp,_lp)
                 print("for _mp, _lp, pattern:",_mp,_lp,_list_of_list_of_pattern)
                 for _list_of_pattern in _list_of_list_of_pattern:
-                    _probability += prod(_n,_s,_list_of_pattern) * perm(_m,_mp) * perm(_N-_m,_n*_s-_mp) / perm(_N,_n*_s)
+                    print("@_list_of_pattern:",_list_of_pattern)
+                    _prod = prod(_n,_s,_list_of_pattern)
+                    _perm1 = perm(_m,_mp)
+                    _perm2 = perm(_N-_m,_n*_s-_mp)
+                    _permN = perm(_N,_n*_s)
+                    print(_prod,_perm1,_perm2,_permN)
+                    _probability += _prod * _perm1 * _perm2 / _permN
                     print("_list_of_pattern,prob:",_list_of_pattern,_probability)
 #        _probability /= perm(_N,_n*_s)
         return _probability
