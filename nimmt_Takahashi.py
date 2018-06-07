@@ -346,7 +346,7 @@ class TakahashiAI(Player):
 
         
         #print("probability2:",self.__get_probability2(30,3,4,5,3))
-        print("probability2:",self.__get_probability2(30,3,4,9,3))
+        print("probability2:",self.__get_probability2(30,3,4,12,4))
 
         sys.exit(1)
         return _insert_prob_list
@@ -393,7 +393,7 @@ class TakahashiAI(Player):
         # create _list_of_list_of_pattern
         # _total = _mp-lp (1st line is occupied for _lp people)
         # _num_keycards_max = _mp-_lp (rest of keycards)
-        _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,_mp-_lp)]
+        _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,min(_mp-_lp,_n-1))]
         print("in __create_pattern:",_list_of_list_of_pattern)
         self.__break_tuple(_list_of_list_of_pattern,copy.deepcopy(_list_of_list_of_pattern[0]),_mp-_lp,_n-1,_lp)
         print("in __create_pattern:",_list_of_list_of_pattern)
