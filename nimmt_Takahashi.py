@@ -382,10 +382,10 @@ class TakahashiAI(Player):
                     _permN = perm(_N,_n*_s)
                     _prob = _prod * _perm1 * _perm2 / _permN
                     print("mp,lp:",_list_of_pattern)
-                    print("_prod:",_prod)
-                    print("_pem1:",_perm1)
-                    print("_pem2:",_perm2)
-                    print("_permN:",_permN)
+#                    print("_prod:",_prod)
+#                    print("_pem1:",_perm1)
+#                    print("_pem2:",_perm2)
+#                    print("_permN:",_permN)
                     print("probablity:",_prob)
                     _probability += _prob
         return _probability
