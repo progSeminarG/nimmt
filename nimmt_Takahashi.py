@@ -364,11 +364,13 @@ class TakahashiAI(Player):
             _prod = 1
             _ss = _s
             for _num_cards,_num_player in _list_of_combination:
-                _prod *= perm(_n,_num_cards)**_num_player
+#                _prod *= perm(_n,_num_cards)**_num_player
+                _prod *= comb(_n,_num_cards)**_num_player
                 _prod *= comb(_ss,_num_player)
                 _ss -= _num_player
             return _prod
         _probability = 0.0
+        _permN = perm(_N,_n*_s)
         for _mp in range(_l,_m+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
                 print("_mp,_lp:",_mp,_lp)
@@ -379,13 +381,12 @@ class TakahashiAI(Player):
                     _prod = prod(_n,_s,_list_of_pattern)
                     _perm1 = perm(_m,_mp)
                     _perm2 = perm(_N-_m,_n*_s-_mp)
-                    _permN = perm(_N,_n*_s)
                     _prob = _prod * _perm1 * _perm2 / _permN
                     print("mp,lp:",_list_of_pattern)
-#                    print("_prod:",_prod)
-#                    print("_pem1:",_perm1)
-#                    print("_pem2:",_perm2)
-#                    print("_permN:",_permN)
+                    print("_prod:",_prod)
+                    print("_pem1:",_perm1)
+                    print("_pem2:",_perm2)
+                    print("_permN:",_permN)
                     print("probablity:",_prob)
                     _probability += _prob
         return _probability
