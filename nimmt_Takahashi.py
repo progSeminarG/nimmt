@@ -262,7 +262,7 @@ class TakahashiAI(Player):
 #        print(self.__get_probability(2,2,2,4,2))
         _num_try = 100
         print(self.__get_score_ordered_list(self.__unknown_cards))
-        print("insert prob:",self.__get_insert_prob())
+        print("insert prob:",self.__get_insert_risk())
         sys.exit(1)
         return self.__put_card_by_demo(_num_try)
 
@@ -307,29 +307,38 @@ class TakahashiAI(Player):
         _score = [Card.get_score(i) for i in _list_of_cards]
         return sorted(_list_of_cards,key=lambda card:_score[_list_of_cards.index(card)],reverse=True)
 
-    def __get_insert_prob(self):
-        _insert_prob_list = []
-        _num_each_cards = len(self.__my_cards_inst)
-        _num_players = self.__num_players -1
-        _num_all_cards = len(self.__unknown_cards)
+    def __get_insert_risk(self):
+        _insert_risk_list = []
+        _insert_prob = []
+        _score_of_lines = []
+        _num_each_cards = len(self.__my_cards_inst) # number of cards for each hand
+        _num_players = self.__num_players -1 # number of players except myself
+        _num_all_cards = len(self.__unknown_cards) # number of cards unknown
         for card in self.__my_cards_inst:
             if card.category is 'h':
-                print("prior_cards:",card.prior_cards)
-                _num_key_cards = len(card.prior_cards)
+                print("prior_cards:",card.prior_cards) # possible inserting cards
+                _num_keycards = len(card.prior_cards) # number of keycards
                 _num_pick_cards = card.num_space
-#                _num_pick_cards = _num_key_cards
-                print("n:",_num_each_cards)
-                print("l:",_num_pick_cards)
-                print("s:",_num_players)
+                print("#:",card.number)
                 print("N:",_num_all_cards)
-                print("m:",_num_key_cards)
-                _insert_prob_list.append(self.__get_probability(_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards))
-            else:
-                _insert_prob_list.append(None)
-        print("cards:",self.__my_cards)
-        print("prob:",_insert_prob_list)
-        print("field:",self.__field)
-        print("unknown:",self.__unknown_cards)
+                print("n:",_num_each_cards)
+                print("s:",_num_players)
+                print("m:",_num_keycards)
+                print("l:",_num_pick_cards)
+#                _insert_prob.append(self.__calc_probability(
+#                    _num_all_cards,
+#                    _num_each_cards,
+#                    _num_players,
+#                    _num_keycards,
+#                    _num_pick_cards))
+
+#                _insert_risk_list.append(self.__get_probability(_num_each_cards,_num_players,_num_keycards,_num_all_cards,_num_pick_cards))
+#            else:
+#                _insert_prob_list.append(None)
+#        print("cards:",self.__my_cards)
+#        print("prob:",_insert_prob_list)
+#        print("field:",self.__field)
+#        print("unknown:",self.__unknown_cards)
 
 #        mylist = [6,0,0,0,0,0]
 #        for i in range(8):
@@ -345,8 +354,8 @@ class TakahashiAI(Player):
 #        print(self.__make_tuple(7,2))
 
         
-        #print("probability2:",self.__get_probability2(30,3,4,5,3))
-        print("probability2:",self.__get_probability2(30,3,4,12,4))
+        #print("probability:",self.__calc_probability(30,3,4,12,4))
+        print("probability:",self.__calc_probability(90,10,8,30,4))
 
         sys.exit(1)
         return _insert_prob_list
@@ -357,32 +366,34 @@ class TakahashiAI(Player):
     # _s: number of players
     # _m: total number of key cards (all has to be distributed)
     # _l: number of people who has keycard (no more or less)
-    def __get_probability2(self,_N,_n,_s,_m,_l):
+    def __calc_probability(self,_N,_n,_s,_m,_l):
+        if _N < _n*_s or _m < _l or _s < _l:
+            print("ERROR: wrong combination in __get_probability2")
+            sys.exit(1)
         def perm(_n,_r):
             return factorial(_n)/factorial(_n-_r) #comb(_n,_r)*factorial(_r)
         def prod(_n,_s,_list_of_combination):
             _prod = 1
             _ss = _s
             for _num_cards,_num_player in _list_of_combination:
-#                _prod *= perm(_n,_num_cards)**_num_player
                 _prod *= comb(_n,_num_cards)**_num_player
                 _prod *= comb(_ss,_num_player)
                 _ss -= _num_player
             return _prod
         _probability = 0.0
         _permN = perm(_N,_n*_s)
-        for _mp in range(_l,_m+1): # number of distributing key cards
+        print("_mp region:",max(_l,_n*_s-_N+_m),_m)
+        print("_lp region:",_l,min(_m,_s))
+        for _mp in range(max(_l,_n*_s-_N+_m),_m+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
-#                print("_mp,_lp:",_mp,_lp)
+                print("_mp,_lp:",_mp,_lp)
                 _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
-#                print("list2pattern:",_list_of_list_of_pattern)
                 for _list_of_pattern in _list_of_list_of_pattern:
 #                    print("_list_of_pattern:",_list_of_pattern)
                     _prod = prod(_n,_s,_list_of_pattern)
                     _perm1 = perm(_m,_mp)
                     _perm2 = perm(_N-_m,_n*_s-_mp)
                     _prob = _prod * _perm1 * _perm2 / _permN
-#                    print("mp,lp:",_list_of_pattern)
 #                    print("_prod:",_prod)
 #                    print("_pem1:",_perm1)
 #                    print("_pem2:",_perm2)
@@ -424,6 +435,7 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
+        print("in __break_tuple:",_current_list)
         if _current_list == [(1,_mp)]:
             return
         for _num_keycards,_num_people in _current_list[::-1]:
