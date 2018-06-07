@@ -2,6 +2,7 @@
 #coding:UTF-8
 
 import random
+import math
 
 ### 基本 Player クラス (みんなこれを使えば良い) ###
 class Player(object):
@@ -19,48 +20,11 @@ class Player(object):
         self.field = self.dealer.field
 
 
-#継承クラス (ここで基本クラスを継承して、様々な処理を行う) version1.1
-#牛の少ない列を戻す，差が1のところに置く
+#継承クラス (ここで基本クラスを継承して、様々な処理を行う) version1.2
+#牛の少ない列を戻す，差が1のところに置く．評価関数を導入
+#大きい数を出したがる平井さん流
 
 class ShiraiAI(Player):
-    def put_card(self):
-        self.my_cards.sort()
-        fb=200
-        print("field",self.dealer.field)
-        print("cards",self.my_cards)
-        for i in range(4):
-    	    for k in range(len(self.my_cards)): #全てのカードと列の最大値との差を計算し1なら返す
-    		    if self.my_cards[k]-self.dealer.field[i][len(self.dealer.field[i])-1]==1 and len(self.dealer.field[i])<5 :
-    			    chose=self.my_cards[k]
-    			    self.my_cards.remove(chose)
-    			    return chose
-    			    
-    	    if len(self.dealer.field[i])==5:
-    	        if fb > self.dealer.field[i][len(self.dealer.field[i])-1]:
-    	            fb = self.dealer.field[i][len(self.dealer.field[i])-1]
-        if self.my_cards[0] > fb:
-            t = random.sample(range(len(self.my_cards)),1)[0]
-            chose = self.my_cards[t]
-            self.my_cards.remove(chose)
-            return chose
-        else:
-            s=0
-            while self.my_cards[s] < fb and s<len(self.my_cards)-1:
-                s+=1
-                print("s:",s)
-            
-            chose = self.my_cards[s]
-            self.my_cards.remove(chose)
-            return chose
-            
-
-    def taking_column(self):#chose min(caw)
-        caw=[0,0,0,0]
-        for i in range(4):
-            caw[i] = self.ctcaw(self.dealer.field[i])
-        col=caw.index(min(caw))
-        return col
-
     def ctcaw(self,cards): #count caw
         _sum = 0
         for i in cards:
@@ -73,6 +37,58 @@ class ShiraiAI(Player):
             else:
                 _sum += 1
         return _sum
+        
+    def cal1(self):
+        self.my_cards.sort()
+        eval_list=[]
+        for i in range(len(self.my_cards)):
+            eval_list.append(i)#PARA 初期値設定(平井さん流)
+        fb=200
+        s=0
+        print("field:")
+        for i in range(4):
+            print(self.dealer.field[i])
+        print("cards:",self.my_cards)
+        for i in range(4):
+    	    for k in range(len(self.my_cards)): #全てのカードと列の最大値との差を計算し1なら返す
+                if self.my_cards[k]-self.dealer.field[i][len(self.dealer.field[i])-1]==1 and len(self.dealer.field[i])<5 :
+    	            eval_list[k]+=100 #PARA
+    	    if len(self.dealer.field[i])==5:#5枚ある列の最小値fb計算
+    	        if fb > self.dealer.field[i][4]:
+    	            fb = self.dealer.field[i][4]
+        while self.my_cards[s]<fb and s<len(self.my_cards)-1:
+            eval_list[s]+=10 #PARA
+            s+=1
+        if s == len(self.my_cards)-1 and self.my_cards[s]<fb:
+            eval_list[s]+=10
+        for i in range(4):
+            danger=max(self.dealer.field[i])+5*(6-len(self.dealer.field[i]))
+            #print("danger--",danger)
+            for j in range(len(eval_list)):
+                if danger-5 < self.my_cards[j] and self.my_cards[j] < danger+5: #PARA
+                    eval_list[j]=eval_list[j]-10#PARA
+        return eval_list
+
+    def taking_column(self):#chose min(caw)
+        caw=[0,0,0,0]
+        mc=[0,0,0,0]
+        for i in range(4):
+            caw[i] = self.ctcaw(self.dealer.field[i])
+        mincaw=min(caw)#min(caw)が複数あったら，末尾が大きい列を選ぶ
+        for i in range (4):
+            if caw[i]==mincaw:
+                mc[i]=max(self.dealer.field[i])
+        col=mc.index(max(mc))
+        return col
+
+    def put_card(self):#return max(eval_list)
+        eval_list = self.cal1()
+        print("list:",eval_list)
+        print("~INFORMATION~")
+        s=eval_list.index(max(eval_list))
+        chose=self.my_cards[s]
+        self.my_cards.remove(chose)
+        return chose
 
     def print_field(self):
         _num_field = self.dealer.num_field
