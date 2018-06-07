@@ -45,10 +45,7 @@ class ShiraiAI(Player):
             eval_list.append(i)#PARA 初期値設定(平井さん流)
         fb=200
         s=0
-        print("field:")
-        for i in range(4):
-            print(self.dealer.field[i])
-        print("cards:",self.my_cards)
+        #print("cards:",self.my_cards)
         for i in range(4):
     	    for k in range(len(self.my_cards)): #全てのカードと列の最大値との差を計算し1なら返す
                 if self.my_cards[k]-self.dealer.field[i][len(self.dealer.field[i])-1]==1 and len(self.dealer.field[i])<5 :
@@ -83,8 +80,8 @@ class ShiraiAI(Player):
 
     def put_card(self):#return max(eval_list)
         eval_list = self.cal1()
-        print("list:",eval_list)
-        print("~INFORMATION~")
+        #print("list:",eval_list)
+        #print("~INFORMATION~")
         s=eval_list.index(max(eval_list))
         chose=self.my_cards[s]
         self.my_cards.remove(chose)
