@@ -373,21 +373,21 @@ class TakahashiAI(Player):
         _permN = perm(_N,_n*_s)
         for _mp in range(_l,_m+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
-                print("_mp,_lp:",_mp,_lp)
+#                print("_mp,_lp:",_mp,_lp)
                 _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
-                print("list2pattern:",_list_of_list_of_pattern)
+#                print("list2pattern:",_list_of_list_of_pattern)
                 for _list_of_pattern in _list_of_list_of_pattern:
 #                    print("_list_of_pattern:",_list_of_pattern)
                     _prod = prod(_n,_s,_list_of_pattern)
                     _perm1 = perm(_m,_mp)
                     _perm2 = perm(_N-_m,_n*_s-_mp)
                     _prob = _prod * _perm1 * _perm2 / _permN
-                    print("mp,lp:",_list_of_pattern)
-                    print("_prod:",_prod)
-                    print("_pem1:",_perm1)
-                    print("_pem2:",_perm2)
-                    print("_permN:",_permN)
-                    print("probablity:",_prob)
+#                    print("mp,lp:",_list_of_pattern)
+#                    print("_prod:",_prod)
+#                    print("_pem1:",_perm1)
+#                    print("_pem2:",_perm2)
+#                    print("_permN:",_permN)
+#                    print("probablity:",_prob)
                     _probability += _prob
         return _probability
 
@@ -426,15 +426,13 @@ class TakahashiAI(Player):
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
         if _current_list == [(1,_mp)]:
             return
-        for _tuple in _current_list[::-1]:
-            _current_list.remove(_tuple)
-            if _tuple[0] > 1: # (x>1,y)
-                _new_num_value = _tuple[0] # x
-                if _tuple[1] > 1: # (x,y>1) y -> y-1
-                    _new_num_people = _tuple[1] -1
-                    _current_list.append((_new_num_value,_new_num_people))
+        for _num_keycards,_num_people in _current_list[::-1]:
+            _current_list.remove((_num_keycards,_num_people))
+            if _num_keycards > 1: # (x>=2,y)
+                if _num_people > 1: # (x,y>=2) y -> y-1
+                    _current_list.append((_num_keycards,_num_people-1))
                 _rest_mp = _mp - self.__sum_tuple(_current_list)
-                _current_list += self.__make_tuple(_rest_mp,_new_num_value-1)
+                _current_list += self.__make_tuple(_rest_mp,_num_keycards-1)
                 if self.__count_num_player(_current_list) <= _lp:
                     _list_of_list_of_tuple.append(_current_list)
                 self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
