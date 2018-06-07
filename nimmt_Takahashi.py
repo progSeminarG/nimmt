@@ -363,10 +363,10 @@ class TakahashiAI(Player):
         def prod(_n,_s,_list_of_combination):
             _prod = 1
             _ss = _s
-            for _tuple in _list_of_combination:
-                _prod *= perm(_n,_tuple[0])**_tuple[1]
-                _prod *= comb(_ss,_tuple[0])
-                _ss -= _tuple[0]
+            for _num_cards,_num_player in _list_of_combination:
+                _prod *= perm(_n,_num_cards)**_num_player
+                _prod *= comb(_ss,_num_player)
+                _ss -= _num_player
             return _prod
         _probability = 0.0
         for _mp in range(_l,_m+1): # number of distributing key cards
@@ -374,15 +374,20 @@ class TakahashiAI(Player):
                 print("_mp,_lp:",_mp,_lp)
                 _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
                 print("list2pattern:",_list_of_list_of_pattern)
-#                if _mp == 5 and _lp == 3:
-#                    sys.exit(1)
                 for _list_of_pattern in _list_of_list_of_pattern:
 #                    print("_list_of_pattern:",_list_of_pattern)
                     _prod = prod(_n,_s,_list_of_pattern)
                     _perm1 = perm(_m,_mp)
                     _perm2 = perm(_N-_m,_n*_s-_mp)
                     _permN = perm(_N,_n*_s)
-                    _probability += _prod * _perm1 * _perm2 / _permN
+                    _prob = _prod * _perm1 * _perm2 / _permN
+                    print("mp,lp:",_list_of_pattern)
+                    print("_prod:",_prod)
+                    print("_pem1:",_perm1)
+                    print("_pem2:",_perm2)
+                    print("_permN:",_permN)
+                    print("probablity:",_prob)
+                    _probability += _prob
         return _probability
 
     # create all possible pattern for
@@ -394,11 +399,12 @@ class TakahashiAI(Player):
         # _total = _mp-lp (1st line is occupied for _lp people)
         # _num_keycards_max = _mp-_lp (rest of keycards)
         _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,min(_mp-_lp,_n-1))]
-        print("in __create_pattern:",_list_of_list_of_pattern)
-        self.__break_tuple(_list_of_list_of_pattern,copy.deepcopy(_list_of_list_of_pattern[0]),_mp-_lp,_n-1,_lp)
-        print("in __create_pattern:",_list_of_list_of_pattern)
+        self.__break_tuple(_list_of_list_of_pattern,
+                copy.deepcopy(_list_of_list_of_pattern[0]),
+                _mp-_lp,
+                _n-1,
+                _lp)
         self.__shift_keycard_num(_list_of_list_of_pattern,_lp)
-        print("in __create_pattern:",_list_of_list_of_pattern)
         return _list_of_list_of_pattern
 
     # add 1 to all x in tuple (x,y) to recover original size
@@ -489,7 +495,10 @@ class TakahashiAI(Player):
         _ged_earned_cards = [[] for i in range(self.__num_players)]
         _field_score = self.__get_field_score(_ged_field)
         _column = _field_score.index(min(_field_score))
-        self._line_up_cards(_ged_field,_ged_played_cards,_ged_earned_cards,self._min_field_score_column)
+        self._line_up_cards(_ged_field,
+                _ged_played_cards,
+                _ged_earned_cards,
+                self._min_field_score_column)
         _ged_earned_score = [Field.calc_score(_ged_earned_cards[j]) for j in range(self.__num_players)]
         return _ged_earned_score
 
