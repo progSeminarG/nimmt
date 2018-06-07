@@ -371,10 +371,11 @@ class TakahashiAI(Player):
         _probability = 0.0
         for _mp in range(_l,_m+1): # number of distributing key cards
             for _lp in range(_l,_mp+1): # number of people 
+                print("### 1 ### _mp, _lp:", _mp, ",", _lp, " of [",_l,",",_m,"], [",_l,",",_mp,"]")
 #                _list_of_list_of_pattern = [self.__make_tuple(_mp,_mp)]
 #                self.__break_tuple(_list_of_list_of_pattern,_mp)
                 _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
-                print("for _mp, _lp, pattern:",_mp,_lp,_list_of_list_of_pattern)
+                print("### 2 ### list of pattern",_list_of_list_of_pattern)
                 for _list_of_pattern in _list_of_list_of_pattern:
                     print("@_list_of_pattern:",_list_of_pattern)
                     _prod = prod(_n,_s,_list_of_pattern)
@@ -393,34 +394,41 @@ class TakahashiAI(Player):
     # _lp: numbef of people who has key cards
     def __create_pattern(self,_n,_mp,_lp):
         _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,_mp-_lp)]
-        if _list_of_list_of_pattern == [[]]:
-            _list_of_list_of_pattern = [[(0,_lp)]]
-        print("_list_of_list_of_pattern:",_list_of_list_of_pattern)
-        self.__break_tuple(_list_of_list_of_pattern,_n,_mp,_lp)
+#        if _list_of_list_of_pattern == [[]]:
+#            _list_of_list_of_pattern = [[(0,_lp)]]
+        self.__break_tuple(_list_of_list_of_pattern,_list_of_list_of_pattern[0],_n,_mp,_lp)
         return _list_of_list_of_pattern
 
     # create list of list of tuples with total _num numbers of cards to distribute
-    def __break_tuple(self,_list_of_list_of_pattern,_n,_mp,_lp):
-        self.__break_tuple_core(_list_of_list_of_pattern,_mp-_lp,_n,_lp)
+    def __break_tuple(self,_list_of_list_of_pattern,_current_list,_n,_mp,_lp):
+        print("@__break_tuple1",_list_of_list_of_pattern, _current_list)
+        self.__break_tuple_core(_list_of_list_of_pattern,_current_list,_mp-_lp,_n,_lp)
+        print("@__break_tuple2",_list_of_list_of_pattern, _current_list)
+        print("@__break_tuple3",len(_list_of_list_of_pattern))
         for _list_of_tuple in _list_of_list_of_pattern:
+            print("you are here")
+            if _list_of_tuple == []:
+                print("@__break_tuple4")
+                _list_of_tuple = [(0,_lp)]
             for i in range(len(_list_of_tuple)):
+                print("here you are!")
                 _list_of_tuple[i] = (_list_of_tuple[i][0]+1,_list_of_tuple[i][1])
         return _list_of_list_of_pattern
 
-    def __break_tuple_core(self,_list_of_list_of_tuple,_num,_n,_lp):
-        if _list_of_list_of_tuple[-1] != [(1,_num)]:
-            _current_list = copy.deepcopy(_list_of_list_of_tuple[-1]) # only the last one will be revised
+    def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_num,_n,_lp):
+        if _current_list != [(1,_num)]:
             for _tuple in _current_list[::-1]:
                 _current_list.remove(_tuple)
                 if _tuple[0] > 1: # (x>1,*)
                     _new_num_value = _tuple[0]
-                    if _tuple[1] > 1 and _tuple[1] <= _lp: # (x,y>1) y -> y-1
+                    if _tuple[1] > 1: # (x,y>1) y -> y-1
                         _new_num_people = _tuple[1] -1
                         _current_list.append((_new_num_value,_new_num_people))
                     _rest_num = _num - self.__sum_tuple(_current_list)
                     _current_list += self.__make_tuple(_rest_num,_new_num_value-1)
-                    _list_of_list_of_tuple.append(_current_list)
-                    self.__break_tuple_core(_list_of_list_of_tuple,_num,_n,_lp)
+                    if self.__count_num_player(_current_list) <= _lp:
+                        _list_of_list_of_tuple.append(_current_list)
+                    self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_num,_n,_lp)
                     break
 
     # create list of tuple with _total number with _num_init as minimum number of cards
@@ -436,12 +444,11 @@ class TakahashiAI(Player):
                     return _tuple_list
         return _tuple_list # case _total==0, _num_init==0
 
-#    # obsolete
-#    def __count_num_player(self,_list_of_tuple):
-#        _sum = 0
-#        for _tuple in _list_of_tuple:
-#            _sum += _tuple[1]
-#        return _sum
+    def __count_num_player(self,_list_of_tuple):
+        _sum = 0
+        for _tuple in _list_of_tuple:
+            _sum += _tuple[1]
+        return _sum
 
     # calculate total number of cards
     def __sum_tuple(self,_list_of_tuple):
