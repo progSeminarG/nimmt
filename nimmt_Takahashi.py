@@ -435,7 +435,7 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
-        print("in __break_tuple:",_current_list)
+        print("in __break_tuple:",len(_list_of_list_of_tuple),self.__count_num_player(_current_list),_current_list)
         if _current_list == [(1,_mp)]:
             return
         for _num_keycards,_num_people in _current_list[::-1]:
@@ -447,6 +447,8 @@ class TakahashiAI(Player):
                 _current_list += self.__make_tuple(_rest_mp,_num_keycards-1)
                 if self.__count_num_player(_current_list) <= _lp:
                     _list_of_list_of_tuple.append(_current_list)
+                else:
+
                 self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
                 break
 
@@ -465,6 +467,16 @@ class TakahashiAI(Player):
                 _tuple_list.append((_num_keycard,_num_people))
                 if _total == 0:
                     return _tuple_list
+    def __skip_tuple(self,_current_list,_total):
+        del _current_list[-1]
+        _num_keycard,_num_people = _current_list[-1]
+        if _num_people > 1:
+            _num_people -= 1
+            _current_list[-1] = (_num_keycard,_num_people)
+            _rest_mp = _total - self.__sum_tuple(_current_list)
+            _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
+        else:
+
 
     def __count_num_player(self,_list_of_tuple):
         _sum = 0
