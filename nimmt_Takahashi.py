@@ -331,7 +331,7 @@ class TakahashiAI(Player):
 #                    _num_players,
 #                    _num_keycards,
 #                    _num_pick_cards))
-
+#
 #                _insert_risk_list.append(self.__get_probability(_num_each_cards,_num_players,_num_keycards,_num_all_cards,_num_pick_cards))
 #            else:
 #                _insert_prob_list.append(None)
@@ -355,7 +355,8 @@ class TakahashiAI(Player):
 
         
         #print("probability:",self.__calc_probability(30,3,4,12,4))
-        print("probability:",self.__calc_probability(90,10,8,30,4))
+#        print("probability:",self.__calc_probability(90,10,8,30,4))
+        print("probability:",self.__calc_probability(90,10,8,43,4))
 
         sys.exit(1)
         return _insert_prob_list
@@ -386,7 +387,7 @@ class TakahashiAI(Player):
         print("_lp region:",_l,min(_m,_s))
         for _mp in range(max(_l,_n*_s-_N+_m),_m+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
-                print("_mp,_lp:",_mp,_lp)
+#                print("_mp,_lp:",_mp,_lp)
                 _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
                 for _list_of_pattern in _list_of_list_of_pattern:
 #                    print("_list_of_pattern:",_list_of_pattern)
@@ -435,7 +436,7 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
-        print("in __break_tuple:",len(_list_of_list_of_tuple),self.__count_num_player(_current_list),_current_list)
+#        print("in __break_tuple,numOfSet,num_player:",len(_list_of_list_of_tuple),self.__count_num_player(_current_list),_current_list)
         if _current_list == [(1,_mp)]:
             return
         for _num_keycards,_num_people in _current_list[::-1]:
@@ -445,10 +446,11 @@ class TakahashiAI(Player):
                     _current_list.append((_num_keycards,_num_people-1))
                 _rest_mp = _mp - self.__sum_tuple(_current_list)
                 _current_list += self.__make_tuple(_rest_mp,_num_keycards-1)
+                if self.__count_num_player(_current_list) > _lp:
+#                    print("_current_list:",_current_list)
+                    self.__skip_tuple(_current_list,_mp)
                 if self.__count_num_player(_current_list) <= _lp:
                     _list_of_list_of_tuple.append(_current_list)
-                else:
-
                 self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
                 break
 
@@ -467,15 +469,20 @@ class TakahashiAI(Player):
                 _tuple_list.append((_num_keycard,_num_people))
                 if _total == 0:
                     return _tuple_list
+
     def __skip_tuple(self,_current_list,_total):
-        del _current_list[-1]
-        _num_keycard,_num_people = _current_list[-1]
+        if len(_current_list) == 1: # if tuple is only one and exceed _lp, no chance to have other combination
+            _current_list = [(1,_total)]
+            return
+        del _current_list[-1] # delete current last tuple
+        _num_keycard,_num_people = _current_list[-1] # get data from current last tuple
         if _num_people > 1:
-            _num_people -= 1
-            _current_list[-1] = (_num_keycard,_num_people)
-            _rest_mp = _total - self.__sum_tuple(_current_list)
-            _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
+            _num_people -= 1 # decrese by one
+            _current_list[-1] = (_num_keycard,_num_people) # update current last tuple
         else:
+            _num_keycard,_num_people = _current_list.pop(-1) # delete and get current last tuple
+        _rest_mp = _total - self.__sum_tuple(_current_list) # calculate missing number of cards
+        _current_list += self.__make_tuple(_rest_mp,_num_keycard-1) # update _current_list
 
 
     def __count_num_player(self,_list_of_tuple):
