@@ -387,7 +387,7 @@ class TakahashiAI(Player):
         print("_lp region:",_l,min(_m,_s))
         for _mp in range(max(_l,_n*_s-_N+_m),_m+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
-#                print("_mp,_lp:",_mp,_lp)
+                print("_mp,_lp:",_mp,_lp)
                 _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
                 for _list_of_pattern in _list_of_list_of_pattern:
 #                    print("_list_of_pattern:",_list_of_pattern)
@@ -436,7 +436,14 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
-#        print("in __break_tuple,numOfSet,num_player:",len(_list_of_list_of_tuple),self.__count_num_player(_current_list),_current_list)
+        if _current_list[0][0] < ceil(_mp/_lp):
+            return
+        print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
+                len(_list_of_list_of_tuple),
+                _mp,
+                _lp,
+                self.__count_num_player(_current_list),
+                _current_list)
         if _current_list == [(1,_mp)]:
             return
         for _num_keycards,_num_people in _current_list[::-1]:
@@ -471,6 +478,7 @@ class TakahashiAI(Player):
                     return _tuple_list
 
     def __skip_tuple(self,_current_list,_total):
+        print("in __skip_tuple:",_current_list)
         if len(_current_list) == 1: # if tuple is only one and exceed _lp, no chance to have other combination
             _current_list = [(1,_total)]
             return
