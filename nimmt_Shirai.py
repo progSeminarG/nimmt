@@ -44,8 +44,9 @@ class ShiraiAI(Player):
         for i in range(len(self.my_cards)):
             eval_list.append(i)#PARA 初期値設定(平井さん流)
         fb=200
+        fc=200
         s=0
-        #print("cards:",self.my_cards)
+        print("cards:",self.my_cards)
         for i in range(4):
     	    for k in range(len(self.my_cards)): #全てのカードと列の最大値との差を計算し1なら返す
                 if self.my_cards[k]-self.dealer.field[i][len(self.dealer.field[i])-1]==1 and len(self.dealer.field[i])<5 :
@@ -53,6 +54,8 @@ class ShiraiAI(Player):
     	    if len(self.dealer.field[i])==5:#5枚ある列の最小値fb計算
     	        if fb > self.dealer.field[i][4]:
     	            fb = self.dealer.field[i][4]
+    	    if fc > max(self.dealer.field[i]):#列の末尾fc
+    	        fc=max(self.dealer.field[i])
         while self.my_cards[s]<fb and s<len(self.my_cards)-1:
             eval_list[s]+=10 #PARA
             s+=1
@@ -60,10 +63,13 @@ class ShiraiAI(Player):
             eval_list[s]+=10
         for i in range(4):
             danger=max(self.dealer.field[i])+5*(6-len(self.dealer.field[i]))
-            #print("danger--",danger)
+            print("danger--",danger)
             for j in range(len(eval_list)):
-                if danger-5 < self.my_cards[j] and self.my_cards[j] < danger+5: #PARA
+                if danger-7 < self.my_cards[j] and self.my_cards[j] < danger+7: #PARA
                     eval_list[j]=eval_list[j]-10#PARA
+        for i in range(len(self.my_cards)):
+            if self.my_cards[i]<fc:
+                eval_list[i]=eval_list[i]-10
         return eval_list
 
     def taking_column(self):#chose min(caw)
@@ -80,8 +86,8 @@ class ShiraiAI(Player):
 
     def put_card(self):#return max(eval_list)
         eval_list = self.cal1()
-        #print("list:",eval_list)
-        #print("~INFORMATION~")
+        print("list:",eval_list)
+        print("~INFORMATION~")
         s=eval_list.index(max(eval_list))
         chose=self.my_cards[s]
         self.my_cards.remove(chose)
