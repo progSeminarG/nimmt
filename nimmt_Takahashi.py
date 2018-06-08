@@ -436,30 +436,57 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
-        if _current_list[0][0] < ceil(_mp/_lp):
-            return
+        pass
+
+    def __break_tuple_core(self,_list_of_tuple,):
         print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
                 len(_list_of_list_of_tuple),
                 _mp,
                 _lp,
                 self.__count_num_player(_current_list),
                 _current_list)
-        if _current_list == [(1,_mp)]:
-            return
         for _num_keycards,_num_people in _current_list[::-1]:
-            _current_list.remove((_num_keycards,_num_people))
+            del _current_list[-1]
             if _num_keycards > 1: # (x>=2,y)
                 if _num_people > 1: # (x,y>=2) y -> y-1
                     _current_list.append((_num_keycards,_num_people-1))
                 _rest_mp = _mp - self.__sum_tuple(_current_list)
                 _current_list += self.__make_tuple(_rest_mp,_num_keycards-1)
                 if self.__count_num_player(_current_list) > _lp:
-#                    print("_current_list:",_current_list)
                     self.__skip_tuple(_current_list,_mp)
                 if self.__count_num_player(_current_list) <= _lp:
                     _list_of_list_of_tuple.append(_current_list)
                 self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
                 break
+#    # create list of list of tuples with total _num numbers of cards to distribute
+#    # _mp: total number of keycards
+#    # _n: number of cards one can hold
+#    # _lp: max number of people to distribute
+#    def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
+#        if _current_list[0][0] < ceil(_mp/_lp):
+#            return
+#        print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
+#                len(_list_of_list_of_tuple),
+#                _mp,
+#                _lp,
+#                self.__count_num_player(_current_list),
+#                _current_list)
+#        if _current_list == [(1,_mp)]:
+#            return
+#        for _num_keycards,_num_people in _current_list[::-1]:
+#            _current_list.remove((_num_keycards,_num_people))
+#            if _num_keycards > 1: # (x>=2,y)
+#                if _num_people > 1: # (x,y>=2) y -> y-1
+#                    _current_list.append((_num_keycards,_num_people-1))
+#                _rest_mp = _mp - self.__sum_tuple(_current_list)
+#                _current_list += self.__make_tuple(_rest_mp,_num_keycards-1)
+#                if self.__count_num_player(_current_list) > _lp:
+##                    print("_current_list:",_current_list)
+#                    self.__skip_tuple(_current_list,_mp)
+#                if self.__count_num_player(_current_list) <= _lp:
+#                    _list_of_list_of_tuple.append(_current_list)
+#                self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
+#                break
 
     # create list of tuple
     # _total: _n * _num_players
