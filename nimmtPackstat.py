@@ -8,6 +8,9 @@ import copy
 import csv
 import pandas as pd
 from pandas import DataFrame,Series
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 class Dealer(object):
     def __init__(self,players_input):
@@ -259,7 +262,7 @@ player8 = Random()
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
 game = Game(players_list)
-NUM_GAME = 100
+NUM_GAME = 20
 f=open("hoge.csv","a")###デフォルトではhoge.csvに出力
 f.write("num,")
 for i in range(len(players_list)-1):
@@ -289,6 +292,7 @@ avest=str(ave)
 f.write(avest)
 f.write('\n')
 
+
 for k in range(len(players_list)):
     ss=str(k)
     f.write("num_"+ ss + ":, ")
@@ -305,6 +309,24 @@ for k in range(len(players_list)):
     f.write('\n')
 f.close()
 
+df = pd.read_csv('hoge.csv',header=0,encoding='utf-8')
+color=['darkviolet','palegreen','springgreen','forestgreen','limegreen','lightgreen','mediumspringgreen','greenyellow','black']
+w = 0.4
+X = range(len(players_list)) 
+Y=[1,1,1,1,1,1,1,1,1]
+Y[0]=df.iloc[NUM_GAME+1,1:len(players_list)+1].values.tolist()
+plt.bar(X, Y[0], color=color[0], width=w,label=0, align="center")
+bt=np.array([0.,0.,0.,0.,0.,0.,0.,0.,0.])
+for i in range(len(players_list)-1):
+	bt+=np.array(Y[i])
+	Y[i+1]=df.iloc[NUM_GAME+i+2,1:len(players_list)+1].values.tolist()
+	plt.bar(X, Y[i+1], color=color[i+1],bottom=bt, width=w,label=i+1, align="center")
 
+plt.legend(loc='upper right', bbox_to_anchor=(1.1,0.6))
+name=[]
+for i in range(len(players_list)):
+    name.append(str(players_list[i].__class__.__name__))
+plt.xticks(X,name,fontsize=8)
+plt.show()
 
 
