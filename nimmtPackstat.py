@@ -215,6 +215,7 @@ class Game(object):
                 print("final score:",game_score_sum)
                 print("##### game end #####")
                 ranking = sorted(range(len(self.players_list)),key=lambda k:game_score_sum[k])
+                print("RANK-----",ranking)
                 for i in ranking:
                     print('{:>2}. {:-<12}({:02}){:>3} |'.format(
                             ranking.index(i)+1,
@@ -227,13 +228,12 @@ class Game(object):
                         print('{:>4}'.format(game_score[j][i]),end='')
                     print()
 		        
-                scsum=[1,1,1,1,1,1,1,1,1]
                 for i in range(len(players_list)-1):
-                    scsum[i]=str(ranking.index(i))
-                    f.write(scsum[i])
+                    rank=str(ranking.index(i))
+                    f.write(rank)
                     f.write(",")
-                scsum[len(players_list)-1]=str(ranking[len(players_list)-1])
-                f.write(scsum[len(players_list)-1])
+                rank=str(ranking.index(len(players_list)-1))
+                f.write(rank)
                 f.write("\n")
                 break
 ### 継承クラス (ここで基本クラスを継承して、様々な処理を行う) ###
@@ -262,7 +262,7 @@ player8 = Random()
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
 game = Game(players_list)
-NUM_GAME = 10
+NUM_GAME = 500
 f=open("hoge.csv","a")###デフォルトではhoge.csvに出力
 f.write("num,")
 for i in range(len(players_list)-1):
@@ -322,7 +322,7 @@ for i in range(len(players_list)-1):
 	Y[i+1]=df.iloc[NUM_GAME+i+2,1:len(players_list)+1].values.tolist()
 	plt.bar(X, Y[i+1], color=color[i+1],bottom=bt, width=w,label=i+1, align="center")
 
-plt.legend(loc='upper right', bbox_to_anchor=(1.1,0.6))
+plt.legend(bbox_to_anchor=(1.1,0.6))
 name=[]
 for i in range(len(players_list)):
     name.append(str(players_list[i].__class__.__name__))
