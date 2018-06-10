@@ -186,7 +186,7 @@ class Player(object):
 
 class Game(object):
     def __init__(self,players):
-        self.SCORE_THRESH = 10
+        self.SCORE_THRESH = 66
         self.players_list = players
 
     def play(self):
@@ -304,6 +304,7 @@ for k in range(len(players_list)):
     f.write(ct)
     f.write('\n')
 f.close()
+
 
 
 
