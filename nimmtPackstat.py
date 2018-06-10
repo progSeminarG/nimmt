@@ -226,10 +226,10 @@ class Game(object):
                     for j in range(igame):
                         print('{:>4}'.format(game_score[j][i]),end='')
                     print()
-                
-                scsum=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+		        
+                scsum=[1,1,1,1,1,1,1,1,1]
                 for i in range(len(players_list)-1):
-                    scsum[i]=str(ranking[i])
+                    scsum[i]=str(ranking.index(i))
                     f.write(scsum[i])
                     f.write(",")
                 scsum[len(players_list)-1]=str(ranking[len(players_list)-1])
@@ -262,7 +262,7 @@ player8 = Random()
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
 game = Game(players_list)
-NUM_GAME = 20
+NUM_GAME = 10
 f=open("hoge.csv","a")###デフォルトではhoge.csvに出力
 f.write("num,")
 for i in range(len(players_list)-1):
