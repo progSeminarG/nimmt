@@ -436,27 +436,58 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
-        pass
+#        _current_list = [(9, 2), (8, 0), (7, 1), (3, -5), (2, 7), (1, 5)]
+#        for _irank in range(len(_current_list)):
+#            print("_irank",_irank)
+#            _mp = self.__sum_tuple(_current_list)
+#            print("_current_list",_current_list)
+#            self.__dec_num_player(_current_list,_irank,_mp)
+#            print("chekc@@@@@",_current_list)
+#        sys.exit(1)
 
-    def __break_tuple_core(self,_list_of_tuple,):
+#        while _current_list != (1,_mp):
+#            self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+
+#        print("current_list",_current_list)
+#        self.__dec_num_player(_current_list,_mp)
+        for i in range(10):
+            print("_current_list",_current_list)
+            self.__dec_num_player(_current_list,_mp)
+
+#        for i in range(200):
+#            self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+
+        sys.exit(1)
+    def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_mp,_lp):
         print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
                 len(_list_of_list_of_tuple),
                 _mp,
                 _lp,
                 self.__count_num_player(_current_list),
                 _current_list)
-        for _num_keycards,_num_people in _current_list[::-1]:
+        for (_num_keycards,_num_people) in _current_list[::-1]:
             del _current_list[-1]
             if _num_keycards > 1: # (x>=2,y)
                 if _num_people > 1: # (x,y>=2) y -> y-1
                     _current_list.append((_num_keycards,_num_people-1))
                 _rest_mp = _mp - self.__sum_tuple(_current_list)
                 _current_list += self.__make_tuple(_rest_mp,_num_keycards-1)
-                if self.__count_num_player(_current_list) > _lp:
-                    self.__skip_tuple(_current_list,_mp)
-                if self.__count_num_player(_current_list) <= _lp:
+                if self.__count_num_player(_current_list) <= _lp: # num_player criterion
                     _list_of_list_of_tuple.append(_current_list)
-                self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
+                else:
+                    self.__skip_tuple(_current_list,_mp,_lp)
                 break
 #    # create list of list of tuples with total _num numbers of cards to distribute
 #    # _mp: total number of keycards
@@ -488,13 +519,13 @@ class TakahashiAI(Player):
 #                self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
 #                break
 
-    # create list of tuple
+    # create a list of tuple
+    #   witch all needed cards are distributed
     # _total: _n * _num_players
     # _num_keycards_max: max number of key card (always _num_keycards_max <= _n)
     # _num_people_max: max of number of people (always _num_people_max <= _s)
     def __make_tuple(self,_total,_num_keycards_max): #,_num_people_max):
-        if _total == 0:
-            return []
+        if _total == 0: return []
         _tuple_list = []
         for _num_keycard in range(_num_keycards_max,0,-1):
             _num_people = int(_total / _num_keycard)
@@ -504,20 +535,96 @@ class TakahashiAI(Player):
                 if _total == 0:
                     return _tuple_list
 
-    def __skip_tuple(self,_current_list,_total):
-        print("in __skip_tuple:",_current_list)
-        if len(_current_list) == 1: # if tuple is only one and exceed _lp, no chance to have other combination
-            _current_list = [(1,_total)]
-            return
-        del _current_list[-1] # delete current last tuple
-        _num_keycard,_num_people = _current_list[-1] # get data from current last tuple
-        if _num_people > 1:
-            _num_people -= 1 # decrese by one
-            _current_list[-1] = (_num_keycard,_num_people) # update current last tuple
+    # return max number of player for _irank-th tuple
+    # if num_player in tuple exceed, decreasing num_player cannot help sum(num_player) <= _lp
+    def __num_max_player_local(self,_tuple_list,_mp,_irank):
+        _sum = 0
+        for _i in range(_irank):
+            _sum += _tuple_list[_i][0]*_tuple_list[_i][1]
+        return int((_mp - _sum)/_tuple_list[_irank][0])
+
+    def __skip_tuple(self,_current_list,_mp,_lp):
+#        print("# __skip_tuple start: _current_list =",_current_list)
+        _num_player = 0
+        for _irank in range(len(_current_list)):
+            _num_player += _current_list[_irank][1]
+#            _num_max_player_local = self.__num_max_player_local(_current_list,_mp,_irank)
+#            print("_current_list,irank",_current_list,_irank)
+#            print("_num_max_player_local,_current_num_player",_num_max_player_local,_current_list[_irank][1])
+            if _num_player > _lp:
+                if _irank >= 1:
+                    del _current_list[_irank:]
+                    _current_list[-1] = (_current_list[-1][0],_current_list[-1][1]-1)
+                    _rest_num = _mp - self.__sum_tuple(_current_list)
+                    _current_list += self.__make_tuple(_rest_num,_current_list[-1][0]-1)
+                else:
+                    _current_list = self.__make_tuple(_mp,1)
+                    print("########",_current_list)
+#            if _num_max_player_local < _current_list[_irank][1]:
+#                if _irank >= 1:
+#                    del _current_list[_irank:]
+#                    _current_list[-1] = (_current_list[-1][0],_current_list[-1][1]-1)
+#                    _rest_num = _mp - self.__sum_tuple(_current_list)
+#                    _current_list += self.__make_tuple(_rest_num,_current_list[-1][0]-1)
+#                else:
+#                    _current_list = self.__make_tuple(_mp,1)
+#                    print("########",_current_list)
+
+
+
+    # decrese number of player by one at _irank-th position
+    # if _irank is not given, the last tuple will be the target
+    # if number of player at _irank is 1, decrese number of player in former rank
+    # the rest of list is filled by appropriate tuple by __make_tuple
+    def __dec_num_player(self,_current_list,_mp,_irank=-1):
+        (_num_keycard,_num_player) = _current_list[_irank] # original values at _irank
+        if _num_keycard == 1: return
+        del _current_list[_irank:] # delete lower keycard including at _irank
+#        if len(_current_list) == 0:
+#            _current_list = self.__make_tuple(_mp,_num_keycard-1)
+#            return
+        if _num_player == 1:
+            print("_current_list",_current_list)
+            self.__dec_num_player(_current_list,_mp,len(_current_list)-1)
         else:
-            _num_keycard,_num_people = _current_list.pop(-1) # delete and get current last tuple
-        _rest_mp = _total - self.__sum_tuple(_current_list) # calculate missing number of cards
-        _current_list += self.__make_tuple(_rest_mp,_num_keycard-1) # update _current_list
+            _current_list.append((_num_keycard,_num_player-1))
+            _rest_mp = _mp - self.__sum_tuple(_current_list)
+            _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
+
+
+
+
+#        try:
+#            del _current_list[_irank+1:]
+#        except:
+#            pass
+#        for (_num_keycard,_num_player) in _current_list[::-1]:
+#            print("@dec",_current_list)
+#            if _num_player == 1:
+#                del _current_list[-1]
+#                self.__dec_num_player(_current_list,len(_current_list-1),_mp)
+#            else:
+#                if _num_keycard == 1: _num_keycard += 1
+#                _current_list[-1] = (_num_keycard,_num_player-1)
+#                _rest_mp = _mp - self.__sum_tuple(_current_list)
+#                _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
+#                return
+
+
+#    def __skip_tuple(self,_current_list,_total,_mp):
+#        print("in __skip_tuple:",_current_list)
+#        if len(_current_list) == 1: # if tuple is only one and exceed _lp, no chance to have other combination
+#            _current_list = [(1,_total)]
+#            return
+#        del _current_list[-1] # delete current last tuple
+#        _num_keycard,_num_people = _current_list[-1] # get data from current last tuple
+#        if _num_people > 1:
+#            _num_people -= 1 # decrese by one
+#            _current_list[-1] = (_num_keycard,_num_people) # update current last tuple
+#        else:
+#            _num_keycard,_num_people = _current_list.pop(-1) # delete and get current last tuple
+#        _rest_mp = _total - self.__sum_tuple(_current_list) # calculate missing number of cards
+#        _current_list += self.__make_tuple(_rest_mp,_num_keycard-1) # update _current_list
 
 
     def __count_num_player(self,_list_of_tuple):
