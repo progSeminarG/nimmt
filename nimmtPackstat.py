@@ -262,7 +262,7 @@ player8 = Random()
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
 game = Game(players_list)
-NUM_GAME = 500
+NUM_GAME = 10
 f=open("hoge.csv","a")###デフォルトではhoge.csvに出力
 f.write("num,")
 for i in range(len(players_list)-1):
@@ -281,13 +281,16 @@ f.close()
 df = pd.read_csv('hoge.csv',header=0,encoding='utf-8')#make dataframe
 f=open("hoge.csv","a")
 f.write("average:,")
+average=[1,1,1,1,1,1,1,1,1]
 for i in range(len(players_list)-1):
     data_list=df.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
     ave=sum(data_list) / len(data_list)
+    average[i]=ave
     avest=str(ave)
     f.write(avest+",")
 data_list=df.iloc[0:NUM_GAME+1,len(players_list)].values.tolist()#端にカンマを入れさせない
 ave=sum(data_list) / len(data_list)
+average[len(players_list)-1]=ave
 avest=str(ave)
 f.write(avest)
 f.write('\n')
@@ -327,6 +330,10 @@ name=[]
 for i in range(len(players_list)):
     name.append(str(players_list[i].__class__.__name__))
 plt.xticks(X,name,fontsize=8)
+
+for i in range(len(players_list)):
+    plt.text(i, 0.1, average[i], ha='center', va='bottom')
+
 plt.show()
 
 
