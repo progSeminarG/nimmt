@@ -436,28 +436,34 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
-        pass
+        while _list_of_list_of_tuple[-1] != (1,_mp):
+            self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
 
-    def __break_tuple_core(self,_list_of_tuple,):
-        print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
-                len(_list_of_list_of_tuple),
+    def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_mp,_lp):
+        print("in __break_tuple,_mp,_lp,num_player,_current_list:",
                 _mp,
                 _lp,
                 self.__count_num_player(_current_list),
                 _current_list)
-        for _num_keycards,_num_people in _current_list[::-1]:
+        for (_num_keycards,_num_people) in _current_list[::-1]:
             del _current_list[-1]
             if _num_keycards > 1: # (x>=2,y)
                 if _num_people > 1: # (x,y>=2) y -> y-1
                     _current_list.append((_num_keycards,_num_people-1))
                 _rest_mp = _mp - self.__sum_tuple(_current_list)
+                print("_rest_mp,_num_keycards",_rest_mp,_num_keycards)
                 _current_list += self.__make_tuple(_rest_mp,_num_keycards-1)
-                if self.__count_num_player(_current_list) > _lp:
-                    self.__skip_tuple(_current_list,_mp)
+                print("_current_list:",_current_list)
                 if self.__count_num_player(_current_list) <= _lp:
                     _list_of_list_of_tuple.append(_current_list)
-                self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
-                break
+                else:
+                    for _irank in range(len(_current_list)):
+                        _local_max_player = self.__get_local_max_player(_current_list,_mp,_irank)
+                        print("_irank,_local_max_player,_current_irank_player:",_irank,_local_max_player,_current_list[_irank][1])
+                        if  _local_max_player < _current_list[_irank][1]:
+                            print("###_local_max_player < _current_player")
+                            print("_current_list,_irank,_mp,_lp",_current_list,_irank,_mp,_lp)
+                            self.__break_tuple_irank(_current_list,_irank-2,_mp)
 #    # create list of list of tuples with total _num numbers of cards to distribute
 #    # _mp: total number of keycards
 #    # _n: number of cards one can hold
@@ -487,6 +493,20 @@ class TakahashiAI(Player):
 #                    _list_of_list_of_tuple.append(_current_list)
 #                self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
 #                break
+
+    def __break_tuple_irank(self,_tuple_list,_irank,_mp):
+        if _tuple_list[_irank][1] > 1:
+            del _tuple_list[_irank+1:]
+            self.__dec_num_people(_tuple_list,-1)
+            _rest_mp = _mp - self.__sum_tuple(_tuple_list)
+            _tuple_list += self.__make_tuple(_rest_mp,_tuple_list[-1][0]-1)
+        else:
+            self.__break_tuple_irank(self,_tuple_list,_irank-1)
+
+
+    def __dec_num_people(self,_tuple_list,_irank):
+        _tuple_list[_irank] = (_tuple_list[_irank][0],_tuple_list[_irank][1]-1)
+
 
     # create list of tuple
     # _total: _n * _num_players
@@ -518,6 +538,15 @@ class TakahashiAI(Player):
             _num_keycard,_num_people = _current_list.pop(-1) # delete and get current last tuple
         _rest_mp = _total - self.__sum_tuple(_current_list) # calculate missing number of cards
         _current_list += self.__make_tuple(_rest_mp,_num_keycard-1) # update _current_list
+
+    # give max number of plyaer in _irank-th tuple
+    def __get_local_max_player(self,_list,_mp,_irank):
+        print("in __get_local_max_player",_list,_mp,_irank)
+        _num_player_local = 0
+        for i in range(_irank-1):
+            _num_player_local += _list[i][0] * _list[i][1]
+        return int((_mp - _num_player_local)/_list[_irank][0])
+
 
 
     def __count_num_player(self,_list_of_tuple):
