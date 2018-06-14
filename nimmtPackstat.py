@@ -3,6 +3,7 @@
 # NUM_GAME (下に定義) の回数一気に python で実行するスクリプト
 
 import random
+import os
 import sys
 import copy
 import csv
@@ -262,8 +263,13 @@ player8 = Random()
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
 game = Game(players_list)
-NUM_GAME = 10
-f=open("hoge.csv","a")###デフォルトではhoge.csvに出力
+NUM_GAME = 5
+
+f=open("hoge.csv","w")###デフォルトではhoge.csvに出力
+f.close()
+os.remove("hoge.csv")###出力するファイルがあれば削除する
+f=open("hoge.csv","a")
+
 f.write("num,")
 for i in range(len(players_list)-1):
     f.write(players_list[i].__class__.__name__)
@@ -312,6 +318,12 @@ for k in range(len(players_list)):
     f.write('\n')
 f.close()
 
+ct1st=[0,0,0,0,0,0,0,0,0,0]
+for i in range(len(players_list)):
+    data_list=df.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
+    ct1st[i]=data_list.count(0)
+
+
 df = pd.read_csv('hoge.csv',header=0,encoding='utf-8')
 color=['darkviolet','palegreen','springgreen','forestgreen','limegreen','lightgreen','mediumspringgreen','greenyellow','black']
 w = 0.4
@@ -332,7 +344,12 @@ for i in range(len(players_list)):
 plt.xticks(X,name,fontsize=8)
 
 for i in range(len(players_list)):
-    plt.text(i, 0.1, average[i], ha='center', va='bottom')
+    plt.text(i, 0.3, average[i], ha='center', va='bottom')
+
+
+for i in range(len(players_list)):
+    st=str(100*ct1st[i]/NUM_GAME)
+    plt.text(i, 0.1, st+"%", ha='center', va='bottom')
 
 plt.show()
 
