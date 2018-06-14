@@ -450,24 +450,9 @@ class TakahashiAI(Player):
 
 #        print("current_list",_current_list)
 #        self.__dec_num_player(_current_list,_mp)
-        for i in range(10):
-            print("_current_list",_current_list)
+        for i in range(30):
+            print("@main _current_list",_current_list)
             self.__dec_num_player(_current_list,_mp)
-
-#        for i in range(200):
-#            self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
-#        self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
 
         sys.exit(1)
     def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_mp,_lp):
@@ -577,18 +562,20 @@ class TakahashiAI(Player):
     # if number of player at _irank is 1, decrese number of player in former rank
     # the rest of list is filled by appropriate tuple by __make_tuple
     def __dec_num_player(self,_current_list,_mp,_irank=-1):
-        (_num_keycard,_num_player) = _current_list[_irank] # original values at _irank
-        if _num_keycard == 1: return
-        del _current_list[_irank:] # delete lower keycard including at _irank
-#        if len(_current_list) == 0:
-#            _current_list = self.__make_tuple(_mp,_num_keycard-1)
-#            return
+        (_num_keycard,_num_player) = _current_list.pop(_irank)
+        if _num_keycard == 1:
+            print("ERROR: pointed _irank is wrong")
+            return
         if _num_player == 1:
-            print("_current_list",_current_list)
-            self.__dec_num_player(_current_list,_mp,len(_current_list)-1)
+            if _current_list != []:
+                self.__dec_num_player(_current_list,_mp,len(_current_list)-1)
+            else:
+                _current_list += self.__make_tuple(_mp,_num_keycard-1)
+                self.__dec_num_player(_current_list,_mp)
         else:
             _current_list.append((_num_keycard,_num_player-1))
             _rest_mp = _mp - self.__sum_tuple(_current_list)
+            print("@dec_num_player",_rest_mp,_num_keycard-1)
             _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
 
 
