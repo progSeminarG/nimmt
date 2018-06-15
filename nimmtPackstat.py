@@ -1,6 +1,9 @@
 #!/usr/local/bin/python3
 
 # NUM_GAME (下に定義) の回数一気に python で実行するスクリプト
+#pandasを用いてcsvを解析し，平均順位，1位を取った割合，各々の順位を取った回数を計算する
+#デフォルトではhoge.csvにデータを出力する（既にある場合は消される）
+#matplotlib,numpyを用いて棒グラフで視覚化する
 
 import random
 import os
@@ -263,7 +266,7 @@ player8 = Random()
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
 game = Game(players_list)
-NUM_GAME = 5
+NUM_GAME = 50
 
 f=open("hoge.csv","w")###デフォルトではhoge.csvに出力
 f.close()
@@ -280,6 +283,7 @@ f.write("\n")
 
 for i in range(NUM_GAME):
     st=str(i)
+    print("\n---~~~---GAME:"+st+"---~~~---")
     f.write(st+":,")
     game.play()
 f.close()
@@ -287,7 +291,7 @@ f.close()
 df = pd.read_csv('hoge.csv',header=0,encoding='utf-8')#make dataframe
 f=open("hoge.csv","a")
 f.write("average:,")
-average=[1,1,1,1,1,1,1,1,1]
+average=[1,1,1,1,1,1,1,1,1,1]
 for i in range(len(players_list)-1):
     data_list=df.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
     ave=sum(data_list) / len(data_list)
@@ -325,10 +329,10 @@ for i in range(len(players_list)):
 
 
 df = pd.read_csv('hoge.csv',header=0,encoding='utf-8')
-color=['darkviolet','palegreen','springgreen','forestgreen','limegreen','lightgreen','mediumspringgreen','greenyellow','black']
+color=['red','skyblue','springgreen','forestgreen','limegreen','lightgreen','mediumspringgreen','greenyellow','black']
 w = 0.4
 X = range(len(players_list)) 
-Y=[1,1,1,1,1,1,1,1,1]
+Y=[1,1,1,1,1,1,1,1,1,1]
 Y[0]=df.iloc[NUM_GAME+1,1:len(players_list)+1].values.tolist()
 plt.bar(X, Y[0], color=color[0], width=w,label=0, align="center")
 bt=np.array([0.,0.,0.,0.,0.,0.,0.,0.,0.])
@@ -341,15 +345,15 @@ plt.legend(bbox_to_anchor=(1.1,0.6))
 name=[]
 for i in range(len(players_list)):
     name.append(str(players_list[i].__class__.__name__))
-plt.xticks(X,name,fontsize=8)
+plt.xticks(X,name,fontsize=7)
 
 for i in range(len(players_list)):
-    plt.text(i, 0.3, average[i], ha='center', va='bottom')
+    plt.text(i, 0.1*NUM_GAME, average[i], ha='center', va='bottom')
 
 
 for i in range(len(players_list)):
     st=str(100*ct1st[i]/NUM_GAME)
-    plt.text(i, 0.1, st+"%", ha='center', va='bottom')
+    plt.text(i, 0.05*NUM_GAME, st+"%", ha='center', va='center')
 
 plt.show()
 
