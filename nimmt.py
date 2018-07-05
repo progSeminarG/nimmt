@@ -189,7 +189,7 @@ from nimmt_Kawada import KawadaAI
 from nimmt_Shirai import ShiraiAI
 from nimmt_Takai import TakaiAI
 from nimmt_Kikuchi import KikuchiAI
-
+from nimmt_Muto import MutoAI
 ### create players ###
 player0 = TakahashiAI()
 player1 = SakuraiAI()
@@ -199,7 +199,8 @@ player4 = HiraiAI()
 player5 = KawadaAI()
 player6 = ShiraiAI()
 player7 = KikuchiAI()
-player8 = Player()
+player8 = MutoAI()
+#player9 = Player()
 
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
