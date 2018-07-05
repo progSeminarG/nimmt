@@ -1,5 +1,5 @@
 #!/usr/local/bin/python3
-
+import sys
 ### 基本 Player クラス (みんなこれを使えば良い) ###
 class Player(object):
     ### 必須メソッド (4 つ) ###
@@ -19,4 +19,9 @@ class Player(object):
         self.field = self.dealer.field
 
 class MutoAI(Player):
-    pass
+    def get_hand(self,my_cards_input):
+        self.my_cards =sorted( my_cards_input , reverse=True)
+        print(self.my_cards)
+        #sys.exit(1)
+    def put_card(self):
+        return self.my_cards.pop(0)
