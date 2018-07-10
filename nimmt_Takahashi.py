@@ -409,6 +409,9 @@ class TakahashiAI(Player):
     # _lp: numbef of people who has keycards
     def __create_pattern(self,_n,_mp,_lp):
         ###  create _list_of_list_of_pattern with small size
+        # _n: number of cards one can hold
+        # _mp: total number of keycard
+        # _lp: max number of people to distribute
         # _total = _mp-lp (1st line is occupied for _lp people)
         # _num_keycards_max = _mp-_lp (rest of keycards)
         _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,min(_mp-_lp,_n-1))]
@@ -437,23 +440,15 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
-        _current_list = [(9, 2), (8, 0), (7, 1), (3, 5), (2, 7), (1, 5)]
-        for _irank in range(len(_current_list)):
-            print("_irank",_irank)
-            _mp = self.__sum_tuple(_current_list)
-            print("_current_list",_current_list)
-            self.__dec_num_player(_current_list,_mp,_irank)
-            print("chekc@@@@@",_current_list)
-        sys.exit(1)
 
-#        while _current_list != (1,_mp):
-#            self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+        while _current_list != (1,_mp):
+            self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
 
-#        print("current_list",_current_list)
-#        self.__dec_num_player(_current_list,_mp)
-        for i in range(30):
-            print("@main _current_list",_current_list)
-            self.__dec_num_player(_current_list,_mp)
+        print("current_list",_current_list)
+        self.__dec_num_player(_current_list,_mp)
+#        for i in range(30):
+#            print("@main _current_list",_current_list)
+#            self.__dec_num_player(_current_list,_mp)
 
         sys.exit(1)
     def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_mp,_lp):
@@ -533,12 +528,14 @@ class TakahashiAI(Player):
     def __skip_tuple(self,_current_list,_mp,_lp):
         _num_player = 0
         for _irank in range(len(_current_list)):
+            print("_num_player:",_num_player,"_irank:",_irank,"_current_list:",_current_list)
             _num_player += _current_list[_irank][1]
 #            _num_max_player_local = self.__num_max_player_local(_current_list,_mp,_irank)
 #            print("_current_list,irank",_current_list,_irank)
 #            print("_num_max_player_local,_current_num_player",_num_max_player_local,_current_list[_irank][1])
             if _num_player > _lp:
                 if _irank >= 1:
+                    #===== chekc =====
                     self.__dec_num_player(_current_list,_mp,_irank)
 #                    del _current_list[_irank:]
 #                    _current_list[-1] = (_current_list[-1][0],_current_list[-1][1]-1)
