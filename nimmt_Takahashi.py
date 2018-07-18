@@ -528,24 +528,26 @@ class TakahashiAI(Player):
     def __skip_tuple(self,_current_list,_mp,_lp):
         _num_player = 0
         for _irank in range(len(_current_list)):
-            print("_num_player:",_num_player,"_irank:",_irank,"_current_list:",_current_list)
             _num_player += _current_list[_irank][1]
+            print("_num_player:",_num_player,"_lp:",_lp,"_irank:",_irank,"_current_list:",_current_list)
 #            _num_max_player_local = self.__num_max_player_local(_current_list,_mp,_irank)
 #            print("_current_list,irank",_current_list,_irank)
 #            print("_num_max_player_local,_current_num_player",_num_max_player_local,_current_list[_irank][1])
             if _num_player > _lp:
-                if _irank >= 1:
+                if _irank > 0:
                     #===== chekc =====
                     self.__dec_num_player(_current_list,_mp,_irank)
 #                    del _current_list[_irank:]
 #                    _current_list[-1] = (_current_list[-1][0],_current_list[-1][1]-1)
 #                    _rest_num = _mp - self.__sum_tuple(_current_list)
 #                    _current_list += self.__make_tuple(_rest_num,_current_list[-1][0]-1)
+                    return
                 else:
                     # return [(1,_mp)] --- id unchanged by indirect substitution
                     del _current_list[:]
                     _current_list += self.__make_tuple(_mp,1)
                     print("########",_current_list)
+                    return
 #            if _num_max_player_local < _current_list[_irank][1]:
 #                if _irank >= 1:
 #                    del _current_list[_irank:]
