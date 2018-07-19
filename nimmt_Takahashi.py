@@ -3,6 +3,9 @@
 import random
 import sys
 import copy
+from itertools import chain
+from math import factorial, ceil, floor
+from scipy.misc import comb
 
 ### 基本 Player クラス (みんなこれを使えば良い) ###
 class Player(object):
@@ -146,21 +149,65 @@ class Card(object):
             self.__column = None # putting column
             self.__right_neighbor = _local_sequence[_index+1]
             self.__position = None
+            self.__num_space = None
+            self.__prior_cards = []
         else:
             self.__category = 'h' # high category
-            self.__left_neighbor = _local_sequence[_index-1]
+            self.__left_neighbor = _local_sequence[_index-1] # field value of the putting column
             self.__column = self.__most_right_field.index(self.__left_neighbor) # putting column
             self.__right_neighbor = self.__max_card+1 if _index == self.__num_field else _local_sequence[_index+1]
             _local_sequence = sorted(self.__unknown_cards + [self.__left_neighbor] + [self.__number])
-            self.__position = _local_sequence.index(self.__number) \
-                - _local_sequence.index(self.__left_neighbor) \
-                + self.__num_cards_column[self.__column]
+            _left_position_lseq = _local_sequence.index(self.__left_neighbor)
+            _my_position_lseq = _local_sequence.index(self.__number)
+            self.__position = _my_position_lseq \
+                - _left_position_lseq \
+                + self.__num_cards_column[self.__column] -1
+            print("num_max_column:",self.__num_max_column)
+            print("self.__num_cards_column:",self.__num_cards_column[self.__column])
+            self.__num_space = self.__num_max_column - self.__num_cards_column[self.__column]
+            self.__prior_cards = copy.deepcopy(_local_sequence[_left_position_lseq+1:_my_position_lseq])
+            print("me:",self.__number)
+            print("unknown:",self.__unknown_cards)
+            print("field:",self.__field_inst.field)
+            print("prior:",self.__prior_cards)
+            print("category:", self.__category)
+            print("column:", self.__column)
+            print("position:", self.__position)
+            #sys.exit(1)
+
+    @staticmethod
+    def get_score(_num):
+        def _bool_same_digit(num):
+            if int(num/10) == 0:
+                return False
+            else:
+                _1st_digit = int(num%10)
+                while True:
+                    num = int(num/10)
+                    if num == 0:
+                        break
+                    if _1st_digit != int(num%10):
+                        return False
+                return True
+        if _bool_same_digit(_num):
+            if _num % 5 == 0:
+                return 7
+            else:
+                return 5
+        elif _num % 10 == 0:
+            return 3
+        elif _num % 5 == 0:
+            return 2
+        else:
+            return 1
+
+
     @property
     def number(self):
         return self.__number #1,..,104
     @property
     def category(self):
-        return sefl.__category #'l'ow,'h'igh
+        return self.__category #'l'ow,'h'igh
     @property
     def column(self):
         return self.__column #None, 0,..,3
@@ -173,6 +220,12 @@ class Card(object):
     @property
     def position(self):
         return self.__position #None, 1,.. (most left card's index is 0)
+    @property
+    def num_space(self):
+        return self.__num_space #None, 4, 3, 2, 1, 0
+    @property
+    def prior_cards(self):
+        return self.__prior_cards #list of possible inserting cards
 
 
 class TakahashiAI(Player):
@@ -190,14 +243,14 @@ class TakahashiAI(Player):
                 ]
         self.__field_inst = Field(self.__dealer)
         self.__field = self.__field_inst.field
-        self.__update_unknown_cards([flatten for inner in self.__field for flatten in inner])
+        self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
 
     def get_hand(self,my_cards_input):
         self.__my_cards = my_cards_input
         self.__my_cards.sort(reverse=True)
         self.__my_original_cards = copy.deepcopy(self.__my_cards)
         self.__update_unknown_cards(self.__my_cards)
-        my_cards_inst = [
+        self.__my_cards_inst = [
                 Card(self.__my_cards[i],self.__field_inst,self.__unknown_cards)
                 for i in range(len(self.__my_cards))
                 ]
@@ -205,14 +258,417 @@ class TakahashiAI(Player):
     def put_card(self):
         self.get_field()
         self.__field_inst.update(field=self.__field)
-        self.__update_unknown_cards([flatten for inner in self.__field for flatten in inner])
+        self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
+#        print(self.__get_probability(2,2,2,4,2))
         _num_try = 100
-        self.__score_for_my_cards = []
+        print(self.__get_score_ordered_list(self.__unknown_cards))
+        print("insert prob:",self.__get_insert_risk())
+        sys.exit(1)
+        return self.__put_card_by_demo(_num_try)
+
+    def __put_card_by_demo(self,num_try):
+        _score_for_my_cards = []
         for _card in self.__my_cards:
-            _score_summed = self.__play_random_pack(_card,_num_try)
-            self.__score_for_my_cards.append(_score_summed)
-        _min_index = self.__score_for_my_cards.index(min(self.__score_for_my_cards))
+            _score_summed = self.__play_random_pack(_card,num_try)
+            _score_for_my_cards.append(_score_summed)
+        _min_index = _score_for_my_cards.index(min(_score_for_my_cards))
         return self.__my_cards.pop(_min_index)
+
+    def __get_probability(self,_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards):
+        _nfact = factorial(_num_each_cards)
+        _num_more = _num_pick_cards%_num_players
+        print("#####")
+        print(_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards)
+        print(float(_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players)))**(_num_more))
+#        print("in 1:",_nfact,_num_each_cards,ceil(_num_pick_cards/_num_players),_num_more)
+        print(float(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players)))**(_num_players-_num_more))
+        print(comb(_num_key_cards,_num_pick_cards))
+        print(float(factorial(_num_pick_cards)))
+        print(float(factorial(_num_all_cards-_num_pick_cards)/factorial(_num_all_cards-_num_each_cards*_num_players)))
+        print(comb(_num_players,_num_more))
+        print(float(factorial(_num_all_cards)))
+        print("prob:",_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players))**(_num_more)*(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players)))**(_num_players-_num_more)*comb(_num_key_cards,_num_pick_cards)*factorial(_num_pick_cards)*factorial(_num_all_cards-_num_pick_cards)/factorial(_num_all_cards-_num_each_cards*_num_players)*comb(_num_players,_num_more)/factorial(_num_all_cards))
+
+
+        print("####/")
+        return (_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players))) \
+                **(_num_more) \
+                *(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players))) \
+                **(_num_players-_num_more) \
+                *comb(_num_key_cards,_num_pick_cards) \
+                *factorial(_num_pick_cards) \
+                *factorial(_num_all_cards-_num_pick_cards) \
+                /factorial(_num_all_cards-_num_each_cards*_num_players) \
+                *comb(_num_players,_num_more) \
+                /factorial(_num_all_cards)
+
+
+    def __get_score_ordered_list(self,_list_of_cards):
+        _score = [Card.get_score(i) for i in _list_of_cards]
+        return sorted(_list_of_cards,key=lambda card:_score[_list_of_cards.index(card)],reverse=True)
+
+    def __get_insert_risk(self):
+        _insert_risk_list = []
+        _insert_prob = []
+        _score_of_lines = []
+        _num_each_cards = len(self.__my_cards_inst) # number of cards for each hand
+        _num_players = self.__num_players -1 # number of players except myself
+        _num_all_cards = len(self.__unknown_cards) # number of cards unknown
+        for card in self.__my_cards_inst:
+            if card.category is 'h':
+                print("prior_cards:",card.prior_cards) # possible inserting cards
+                _num_keycards = len(card.prior_cards) # number of keycards
+                _num_pick_cards = card.num_space
+                print("#:",card.number)
+                print("N:",_num_all_cards)
+                print("n:",_num_each_cards)
+                print("s:",_num_players)
+                print("m:",_num_keycards)
+                print("l:",_num_pick_cards)
+#                _insert_prob.append(self.__calc_probability(
+#                    _num_all_cards,
+#                    _num_each_cards,
+#                    _num_players,
+#                    _num_keycards,
+#                    _num_pick_cards))
+#
+#                _insert_risk_list.append(self.__get_probability(_num_each_cards,_num_players,_num_keycards,_num_all_cards,_num_pick_cards))
+#            else:
+#                _insert_prob_list.append(None)
+#        print("cards:",self.__my_cards)
+#        print("prob:",_insert_prob_list)
+#        print("field:",self.__field)
+#        print("unknown:",self.__unknown_cards)
+
+#        mylist = [6,0,0,0,0,0]
+#        for i in range(8):
+#            print("mylist:",i,mylist)
+#            mylist = self.__shift(mylist)
+
+#        _list_of_list_of_tuple = [self.__make_tuple(7,7)]
+#        self.__break_tuple(_list_of_list_of_tuple,7)
+#        for i in _list_of_list_of_tuple:
+#            print(i)
+
+#        print("##### check __mek_rest_tuple")
+#        print(self.__make_tuple(7,2))
+
+        
+        #print("probability:",self.__calc_probability(30,3,4,12,4))
+#        print("probability:",self.__calc_probability(90,10,8,30,4))
+        print("probability:",self.__calc_probability(90,10,8,43,4))
+
+        sys.exit(1)
+        return _insert_prob_list
+
+    # calc probability
+    # _N: total number of cards
+    # _n: number of cards each player has
+    # _s: number of players
+    # _m: total number of key cards (all has to be distributed)
+    # _l: number of people who has keycard (no more or less)
+    def __calc_probability(self,_N,_n,_s,_m,_l):
+        if _N < _n*_s or _m < _l or _s < _l:
+            print("ERROR: wrong combination in __get_probability2")
+            sys.exit(1)
+        def perm(_n,_r):
+            return factorial(_n)/factorial(_n-_r) #comb(_n,_r)*factorial(_r)
+        def prod(_n,_s,_list_of_combination):
+            _prod = 1
+            _ss = _s
+            for _num_cards,_num_player in _list_of_combination:
+                _prod *= comb(_n,_num_cards)**_num_player
+                _prod *= comb(_ss,_num_player)
+                _ss -= _num_player
+            return _prod
+        _probability = 0.0
+        _permN = perm(_N,_n*_s)
+        print("_mp region:",max(_l,_n*_s-_N+_m),_m)
+        print("_lp region:",_l,min(_m,_s))
+        for _mp in range(max(_l,_n*_s-_N+_m),_m+1): # number of distributing key cards
+            for _lp in range(_l,min(_mp,_s)+1): # number of people 
+                print("_mp,_lp:",_mp,_lp)
+                _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
+                for _list_of_pattern in _list_of_list_of_pattern:
+#                    print("_list_of_pattern:",_list_of_pattern)
+                    _prod = prod(_n,_s,_list_of_pattern)
+                    _perm1 = perm(_m,_mp)
+                    _perm2 = perm(_N-_m,_n*_s-_mp)
+                    _prob = _prod * _perm1 * _perm2 / _permN
+#                    print("_prod:",_prod)
+#                    print("_pem1:",_perm1)
+#                    print("_pem2:",_perm2)
+#                    print("_permN:",_permN)
+#                    print("probablity:",_prob)
+                    _probability += _prob
+        return _probability
+
+    ### create all possible pattern for
+    # _n:  number of cards one has
+    # _mp: number of key cards to hand out
+    # _lp: numbef of people who has keycards
+    def __create_pattern(self,_n,_mp,_lp):
+        ###  create _list_of_list_of_pattern with small size
+        # _n: number of cards one can hold
+        # _mp: total number of keycard
+        # _lp: max number of people to distribute
+        # _total = _mp-lp (1st line is occupied for _lp people)
+        # _num_keycards_max = _mp-_lp (rest of keycards)
+        _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,min(_mp-_lp,_n-1))]
+        self.__break_tuple(_list_of_list_of_pattern,
+                copy.deepcopy(_list_of_list_of_pattern[0]),
+                _mp-_lp,
+                _n-1,
+                _lp)
+        # add 1 to all num_keycards to recover original size
+        self.__shift_keycard_num(_list_of_list_of_pattern,_lp)
+        return _list_of_list_of_pattern
+
+    # add 1 to all x in tuple (x,y) to recover original size
+    def __shift_keycard_num(self,_list_of_list_of_tuple,_lp):
+        for k in range(len(_list_of_list_of_tuple)):
+            if _list_of_list_of_tuple[k] == []:
+                _list_of_list_of_tuple[k] = [(0,_lp)]
+            for i in range(len(_list_of_list_of_tuple[k])):
+                _list_of_list_of_tuple[k][i] = (_list_of_list_of_tuple[k][i][0]+1,_list_of_list_of_tuple[k][i][1])
+            _num_people = self.__count_num_player(_list_of_list_of_tuple[k])
+            if _num_people < _lp:
+                _list_of_list_of_tuple[k].append((1,_lp-_num_people))
+
+    # create list of list of tuples with total _num numbers of cards to distribute
+    # _mp: total number of keycards
+    # _n: number of cards one can hold
+    # _lp: max number of people to distribute
+    def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
+
+        while _current_list != (1,_mp):
+            self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+
+        print("current_list",_current_list)
+        self.__dec_num_player(_current_list,_mp)
+#        for i in range(30):
+#            print("@main _current_list",_current_list)
+#            self.__dec_num_player(_current_list,_mp)
+
+        sys.exit(1)
+    def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_mp,_lp):
+        print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
+                len(_list_of_list_of_tuple),
+                _mp,
+                _lp,
+                self.__count_num_player(_current_list),
+                _current_list)
+        # from bottom tuple check if breaking possible
+        for (_num_keycards,_num_people) in _current_list[::-1]:
+            del _current_list[-1]
+            if _num_keycards > 1: # if _num_keycards == 1, it can't break. go to next upper tuple
+                if _num_people > 1: # if _num_people > 1, it can be decreased
+                    _current_list.append((_num_keycards,_num_people-1)) # add decreased tuple
+                _rest_mp = _mp - self.__sum_tuple(_current_list) # calculate _mp for lower tuple
+                _current_list += self.__make_tuple(_rest_mp,_num_keycards-1) # fill lower tuples
+                if self.__count_num_player(_current_list) <= _lp: # num_player criterion okey
+                    _list_of_list_of_tuple.append(_current_list)
+                else: # case where num_player exceed _lp
+                    self.__skip_tuple(_current_list,_mp,_lp)
+                break # loop ended here and return
+#    # create list of list of tuples with total _num numbers of cards to distribute
+#    # _mp: total number of keycards
+#    # _n: number of cards one can hold
+#    # _lp: max number of people to distribute
+#    def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
+#        if _current_list[0][0] < ceil(_mp/_lp):
+#            return
+#        print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
+#                len(_list_of_list_of_tuple),
+#                _mp,
+#                _lp,
+#                self.__count_num_player(_current_list),
+#                _current_list)
+#        if _current_list == [(1,_mp)]:
+#            return
+#        for _num_keycards,_num_people in _current_list[::-1]:
+#            _current_list.remove((_num_keycards,_num_people))
+#            if _num_keycards > 1: # (x>=2,y)
+#                if _num_people > 1: # (x,y>=2) y -> y-1
+#                    _current_list.append((_num_keycards,_num_people-1))
+#                _rest_mp = _mp - self.__sum_tuple(_current_list)
+#                _current_list += self.__make_tuple(_rest_mp,_num_keycards-1)
+#                if self.__count_num_player(_current_list) > _lp:
+##                    print("_current_list:",_current_list)
+#                    self.__skip_tuple(_current_list,_mp)
+#                if self.__count_num_player(_current_list) <= _lp:
+#                    _list_of_list_of_tuple.append(_current_list)
+#                self.__break_tuple(_list_of_list_of_tuple,copy.deepcopy(_current_list),_mp,_n,_lp)
+#                break
+
+    # create a list of tuple
+    #   witch all needed cards are distributed
+    # _total: _n * _num_players
+    # _num_keycards_max: max number of key card (always _num_keycards_max <= _n)
+    # _num_people_max: max of number of people (always _num_people_max <= _s)
+    def __make_tuple(self,_total,_num_keycards_max): #,_num_people_max):
+        if _total == 0: return []
+        _tuple_list = []
+        for _num_keycard in range(_num_keycards_max,0,-1):
+            _num_people = int(_total / _num_keycard)
+            if _num_people > 0:
+                _total -= _num_keycard * _num_people
+                _tuple_list.append((_num_keycard,_num_people))
+                if _total == 0:
+                    return _tuple_list
+
+    # return max number of player for _irank-th tuple
+    # if num_player in tuple exceed, decreasing num_player cannot help sum(num_player) <= _lp
+    def __num_max_player_local(self,_tuple_list,_mp,_irank):
+        _sum = 0
+        for _i in range(_irank):
+            _sum += _tuple_list[_i][0]*_tuple_list[_i][1]
+        return int((_mp - _sum)/_tuple_list[_irank][0])
+
+    def __skip_tuple(self,_current_list,_mp,_lp):
+        _num_player = 0
+        for _irank in range(len(_current_list)):
+            _num_player += _current_list[_irank][1]
+            print("_num_player:",_num_player,"_lp:",_lp,"_irank:",_irank,"_current_list:",_current_list)
+#            _num_max_player_local = self.__num_max_player_local(_current_list,_mp,_irank)
+#            print("_current_list,irank",_current_list,_irank)
+#            print("_num_max_player_local,_current_num_player",_num_max_player_local,_current_list[_irank][1])
+            if _num_player > _lp:
+                if _irank > 0:
+                    #===== chekc =====
+                    self.__dec_num_player(_current_list,_mp,_irank)
+#                    del _current_list[_irank:]
+#                    _current_list[-1] = (_current_list[-1][0],_current_list[-1][1]-1)
+#                    _rest_num = _mp - self.__sum_tuple(_current_list)
+#                    _current_list += self.__make_tuple(_rest_num,_current_list[-1][0]-1)
+                    return
+                else:
+                    # return [(1,_mp)] --- id unchanged by indirect substitution
+                    del _current_list[:]
+                    _current_list += self.__make_tuple(_mp,1)
+                    print("########",_current_list)
+                    return
+#            if _num_max_player_local < _current_list[_irank][1]:
+#                if _irank >= 1:
+#                    del _current_list[_irank:]
+#                    _current_list[-1] = (_current_list[-1][0],_current_list[-1][1]-1)
+#                    _rest_num = _mp - self.__sum_tuple(_current_list)
+#                    _current_list += self.__make_tuple(_rest_num,_current_list[-1][0]-1)
+#                else:
+#                    _current_list = self.__make_tuple(_mp,1)
+#                    print("########",_current_list)
+
+
+
+    # decrese number of player by one at _irank-th position
+    # if _irank is not given, the last tuple will be the target
+    # if number of player at _irank is 1, decrese number of player in former rank
+    # the rest of list is filled by appropriate tuple by __make_tuple
+    def __dec_num_player(self,_current_list,_mp,_irank=-1):
+        (_num_keycard,_num_player) = _current_list[_irank]
+        del _current_list[_irank:]
+        if _num_keycard == 1:
+            print("ERROR: pointed _irank is wrong")
+            return
+        if _num_player == 1:
+            if _current_list != []:
+                self.__dec_num_player(_current_list,_mp,len(_current_list)-1)
+            else:
+                _current_list += self.__make_tuple(_mp,_num_keycard-1)
+                self.__dec_num_player(_current_list,_mp)
+        else:
+            _current_list.append((_num_keycard,_num_player-1))
+            _rest_mp = _mp - self.__sum_tuple(_current_list)
+            print("@dec_num_player",_rest_mp,_num_keycard-1)
+            _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
+
+    # decrese number of player by one at _irank-th position
+    # if _irank is not given, the last tuple will be the target
+    # if number of player at _irank is 1, create _num_keycard[_irank]-1 tuple or decrese _num_keycard[_irank-1] if _num_keycard[_irank-1] = _num_keycard[_irank]-1
+    # the rest of list is filled by appropriate tuple by __make_tuple
+    def __dec_num_player_soft(self,_current_list,_mp,_irank=-1):
+        (_num_keycard,_num_player) = _current_list[_irank]
+        del _current_list[_irank:]
+        if _num_keycard == 1:
+            print("ERROR: pointed _irank is wrong")
+            return
+        if _num_player == 1: # case that cannot decrese num_player
+            if _current_list != []: # case that _irank > 0
+                if _num_keycard == _current_list[-1][1]-1: # num_keycards are neighbors for _irank-1 and _irank
+                    self.__dec_num_player_soft(_current_list,_mp)
+                else:
+                    _rest_mp = _mp - self.__sum_tuple(_current_list)
+                    _current_list += self.__make_tuple(_rest_mp,_num_keycard+1)
+
+            else:
+                _current_list += self.__make_tuple(_mp,_num_keycard-1)
+                self.__dec_num_player(_current_list,_mp)
+        else:
+            _current_list.append((_num_keycard,_num_player-1))
+            _rest_mp = _mp - self.__sum_tuple(_current_list)
+            print("@dec_num_player",_rest_mp,_num_keycard-1)
+            _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
+
+
+
+#        try:
+#            del _current_list[_irank+1:]
+#        except:
+#            pass
+#        for (_num_keycard,_num_player) in _current_list[::-1]:
+#            print("@dec",_current_list)
+#            if _num_player == 1:
+#                del _current_list[-1]
+#                self.__dec_num_player(_current_list,len(_current_list-1),_mp)
+#            else:
+#                if _num_keycard == 1: _num_keycard += 1
+#                _current_list[-1] = (_num_keycard,_num_player-1)
+#                _rest_mp = _mp - self.__sum_tuple(_current_list)
+#                _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
+#                return
+
+
+#    def __skip_tuple(self,_current_list,_total,_mp):
+#        print("in __skip_tuple:",_current_list)
+#        if len(_current_list) == 1: # if tuple is only one and exceed _lp, no chance to have other combination
+#            _current_list = [(1,_total)]
+#            return
+#        del _current_list[-1] # delete current last tuple
+#        _num_keycard,_num_people = _current_list[-1] # get data from current last tuple
+#        if _num_people > 1:
+#            _num_people -= 1 # decrese by one
+#            _current_list[-1] = (_num_keycard,_num_people) # update current last tuple
+#        else:
+#            _num_keycard,_num_people = _current_list.pop(-1) # delete and get current last tuple
+#        _rest_mp = _total - self.__sum_tuple(_current_list) # calculate missing number of cards
+#        _current_list += self.__make_tuple(_rest_mp,_num_keycard-1) # update _current_list
+
+
+    def __count_num_player(self,_list_of_tuple):
+        _sum = 0
+        for _tuple in _list_of_tuple:
+            _sum += _tuple[1]
+        return _sum
+
+    # calculate total number of cards
+    def __sum_tuple(self,_list_of_tuple):
+        _sum = 0
+        for _tuple in _list_of_tuple:
+            _sum += _tuple[0]*_tuple[1]
+        return _sum
+
+#    # obsolete
+#    # given _list_input re-distributed
+#    def __shift(self,_list_input): #bug: ex) for 6, [2,2,2,0,0,0] can't be detected
+#        _list = copy.deepcopy(_list_input)
+#        _num_list = len(_list)
+#        for k in range(_num_list)[::-1]:
+#            if _list[k] > 1:
+#                _list[k] = _list[k]-1
+#                for l in range(k+1,_num_list):
+#                    if _list[l] < _list[k]:
+#                        _list[l] = _list[l]+1
+#                        return _list
 
     def __play_random_pack(self,_my_card,_num_play):
         _ged_earned_score_sum = [0]*self.__num_players
@@ -228,7 +684,10 @@ class TakahashiAI(Player):
         _ged_earned_cards = [[] for i in range(self.__num_players)]
         _field_score = self.__get_field_score(_ged_field)
         _column = _field_score.index(min(_field_score))
-        self._line_up_cards(_ged_field,_ged_played_cards,_ged_earned_cards,self._min_field_score_column)
+        self._line_up_cards(_ged_field,
+                _ged_played_cards,
+                _ged_earned_cards,
+                self._min_field_score_column)
         _ged_earned_score = [Field.calc_score(_ged_earned_cards[j]) for j in range(self.__num_players)]
         return _ged_earned_score
 
@@ -306,7 +765,7 @@ class TakahashiAI(Player):
 
     def get_field(self): # 場の状況を得る
         self.__field = self.__dealer.field
-        self.__update_unknown_cards([flatten for inner in self.__field for flatten in inner])
+        self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
 
     def _min_field_score_column(self):
         _field_score = self.__get_field_score(self.__field)
