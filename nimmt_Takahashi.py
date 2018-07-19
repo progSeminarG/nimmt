@@ -441,16 +441,12 @@ class TakahashiAI(Player):
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
 
-        while _current_list != (1,_mp):
+        while _current_list != [(1,_mp)]:
             self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
 
         print("current_list",_current_list)
         self.__dec_num_player(_current_list,_mp)
-#        for i in range(30):
-#            print("@main _current_list",_current_list)
-#            self.__dec_num_player(_current_list,_mp)
 
-        sys.exit(1)
     def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_mp,_lp):
         print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
                 len(_list_of_list_of_tuple),
@@ -471,6 +467,7 @@ class TakahashiAI(Player):
                 else: # case where num_player exceed _lp
                     self.__skip_tuple(_current_list,_mp,_lp)
                 break # loop ended here and return
+
 #    # create list of list of tuples with total _num numbers of cards to distribute
 #    # _mp: total number of keycards
 #    # _n: number of cards one can hold
@@ -535,7 +532,7 @@ class TakahashiAI(Player):
 #            print("_num_max_player_local,_current_num_player",_num_max_player_local,_current_list[_irank][1])
             if _num_player > _lp:
                 if _irank > 0:
-                    #===== chekc =====
+                    #===== check =====
                     self.__dec_num_player(_current_list,_mp,_irank)
 #                    del _current_list[_irank:]
 #                    _current_list[-1] = (_current_list[-1][0],_current_list[-1][1]-1)
