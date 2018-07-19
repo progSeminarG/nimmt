@@ -441,19 +441,17 @@ class TakahashiAI(Player):
     # _lp: max number of people to distribute
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
 
+        _numOfSet = 0
         while _current_list != [(1,_mp)]:
+            if _numOfSet != len(_list_of_list_of_tuple):
+                _numOfSet += 1
+                print("_numOfSet:",len(_list_of_list_of_tuple),
+                        "(_mp,_lp):",(_mp,_lp),":",
+                        (self.__sum_tuple(_current_list),self.__count_num_player(_current_list)),
+                        "_current_list:",_current_list)
             self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
 
-        print("current_list",_current_list)
-        self.__dec_num_player(_current_list,_mp)
-
     def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_mp,_lp):
-        print("in __break_tuple,numOfSet,_mp,_lp,num_player:",
-                len(_list_of_list_of_tuple),
-                _mp,
-                _lp,
-                self.__count_num_player(_current_list),
-                _current_list)
         # from bottom tuple check if breaking possible
         for (_num_keycards,_num_people) in _current_list[::-1]:
             del _current_list[-1]
@@ -504,7 +502,6 @@ class TakahashiAI(Player):
                     # return [(1,_mp)] --- id unchanged by indirect substitution
                     del _current_list[:]
                     _current_list += self.__make_tuple(_mp,1)
-                    print("########",_current_list)
                     return
 
     # decrese number of player by one at _irank-th position
@@ -515,7 +512,7 @@ class TakahashiAI(Player):
         (_num_keycard,_num_player) = _current_list[_irank]
         del _current_list[_irank:]
         if _num_keycard == 1:
-            print("ERROR: pointed _irank is wrong")
+#            print("ERROR: pointed _irank is wrong. _current_list:",_current_list)
             return
         if _num_player == 1:
             if _current_list != []:
@@ -526,7 +523,7 @@ class TakahashiAI(Player):
         else:
             _current_list.append((_num_keycard,_num_player-1))
             _rest_mp = _mp - self.__sum_tuple(_current_list)
-            print("@dec_num_player",_rest_mp,_num_keycard-1)
+#            print("@dec_num_player",_rest_mp,_num_keycard-1)
             _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
 
     # decrese number of player by one at _irank-th position
