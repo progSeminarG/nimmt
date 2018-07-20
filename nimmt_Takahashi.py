@@ -353,6 +353,13 @@ class TakahashiAI(Player):
 #        print("##### check __mek_rest_tuple")
 #        print(self.__make_tuple(7,2))
 
+#        _current_list = self.__make_tuple(4,4)
+#        _list_of_current_list = [copy.deepcopy(_current_list)]
+#        print("_list_of_current_list0:",_list_of_current_list)
+#        self.__break_tuple(_list_of_current_list,_current_list,4,3,4)
+#        print("_list_of_current_list1:",_list_of_current_list)
+#        sys.exit(1)
+
         _N = 30 # 90 # total number of cards
         _n =  3 # 10 # number of cards one hold
         _s =  4 # 8  # number of players
@@ -388,11 +395,11 @@ class TakahashiAI(Player):
             return _prod
         _probability = 0.0
         _permN = perm(_N,_n*_s)
-        print("_mp range= [",max(_l,_n*_s-_N+_m),":",_m,"]")
+        print("_mp range= [",max(_l,_n*_s-_N+_m),":",min(_m,_n*_s),"]")
         print("_lp range= [",_l,":",min(_m,_s),"]")
-        for _mp in range(max(_l,_n*_s-_N+_m),_m+1): # number of distributing key cards
+        for _mp in range(max(_l,_n*_s-_N+_m),min(_m,_n*_s)+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
-                print("calc probability of _mp,_lp:",_mp,_lp)
+#                print("calc probability of _mp,_lp:",_mp,_lp)
                 _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
                 _prob_m_l = 0.0
                 for _list_of_pattern in _list_of_list_of_pattern:
@@ -409,6 +416,7 @@ class TakahashiAI(Player):
                     _prob_m_l += _prob
                 _probability += _prob_m_l
                 print("probability of (_mp,_lp)=(",_mp,",",_lp,"), P=",_prob_m_l)
+                print(_list_of_list_of_pattern)
         return _probability
 
     ### create all possible pattern for
@@ -443,19 +451,23 @@ class TakahashiAI(Player):
     # _n: number of cards one can hold
     # _lp: max number of people to distribute keycards
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
-
         _numOfSet = 0
         while _current_list != [(1,_mp)]:
             if _numOfSet != len(_list_of_list_of_tuple):
                 _numOfSet = len(_list_of_list_of_tuple)
-                print("_numOfSet:",len(_list_of_list_of_tuple),
-                        "(_mp,_lp)=",(_mp,_lp),",",
-                        (self.__sum_tuple(_current_list),self.__count_num_player(_current_list)),
-                        "_current_list:",_current_list)
+#                print("_numOfSet:",len(_list_of_list_of_tuple),
+#                        "(_mp,_lp)=",(_mp,_lp),",",
+#                        (self.__sum_tuple(_current_list),self.__count_num_player(_current_list)),
+#                        "_current_list:",_current_list)
             self.__break_tuple_core(_current_list,_mp,_lp)
+#            print("check0 _current_list",_current_list)
             if _current_list != [(1,_mp)]:
-                _list_of_list_of_tuple.append(_current_list)
+#                print("check1 _current_list",_current_list)
+                _list_of_list_of_tuple.append(copy.deepcopy(_current_list))
 
+    # seach from last tuple and decrease _num_people
+    #   if _num_people == 1, go to upper tuple and decrease _num_people
+    #   if _num_keycards == 1, return []
     def __break_tuple_core(self,_current_list,_mp,_lp):
         # from bottom tuple check if breaking possible
         for (_num_keycards,_num_people) in _current_list[::-1]:
@@ -519,14 +531,18 @@ class TakahashiAI(Player):
     # decrese number of player by one at _irank-th position
     #   _current_list is updated
     # if _irank is not given, the last tuple will be the target
+    # if number of keycard at _irank is 1, delete last tuple and return
     # if number of player at _irank is 1, decrese number of player in former rank
     # the rest of list is filled by appropriate tuple by __make_tuple
     #    __make_tuple takes total number of keycards and max number of keycards
     # it does not check if number of people is small enough
     def __dec_num_player(self,_current_list,_mp,_irank=-1):
+        if _current_list == [(1,_mp)]:
+            return
         (_num_keycard,_num_player) = _current_list[_irank]
         del _current_list[_irank:]
         if _num_keycard == 1:
+            self.__dec_num_player(_current_list,_mp)
             return
         if _num_player == 1:
             if _current_list != []:
