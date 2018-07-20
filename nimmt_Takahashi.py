@@ -327,8 +327,8 @@ class TakahashiAI(Player):
                 print("m:",_num_keycards)
                 print("l:",_num_pick_cards)
                 _insert_prob_list.append(self.__calc_probability(_num_all_cards,_num_each_cards,_num_players,_num_keycards,_num_pick_cards))
-#        print("insert_prob_list=",_insert_prob_list)
-#        return _insert_prob_list
+        print("insert_prob_list=",_insert_prob_list)
+        return _insert_prob_list
 
 #        _current_list = self.__make_tuple(4,4)
 #        _list_of_current_list = [copy.deepcopy(_current_list)]
@@ -337,14 +337,13 @@ class TakahashiAI(Player):
 #        print("_list_of_current_list1:",_list_of_current_list)
 #        sys.exit(1)
 
-        _N = 90 # 30 # 90 # total number of cards
-        _n = 10 #  3 # 10 # number of cards one hold
-        _s =  8 #  4 # 8  # number of players
-        _m =  3 # 15 # 43 # number of key cards
-        _l =  4 #  4 # 4  # number of people who has keycard
-        print("probability:",self.__calc_probability(_N,_n,_s,_m,_l))
-
-        sys.exit(1)
+#        _N = 90 # 30 # 90 # total number of cards
+#        _n = 10 #  3 # 10 # number of cards one hold
+#        _s =  8 #  4 # 8  # number of players
+#        _m =  3 # 15 # 43 # number of key cards
+#        _l =  4 #  4 # 4  # number of people who has keycard
+#        print("probability:",self.__calc_probability(_N,_n,_s,_m,_l))
+#        sys.exit(1)
 #        return _insert_prob_list
 
     # calc probability
