@@ -353,10 +353,15 @@ class TakahashiAI(Player):
 #        print("##### check __mek_rest_tuple")
 #        print(self.__make_tuple(7,2))
 
-        
+        _N = 30 # 90 # total number of cards
+        _n =  3 # 10 # number of cards one hold
+        _s =  4 # 8  # number of players
+        _m = 15 # 43 # number of key cards
+        _l =  4 # 4  # number of people who has keycard
         #print("probability:",self.__calc_probability(30,3,4,12,4))
 #        print("probability:",self.__calc_probability(90,10,8,30,4))
-        print("probability:",self.__calc_probability(90,10,8,43,4))
+#        print("probability:",self.__calc_probability(90,10,8,43,4))
+        print("probability:",self.__calc_probability(_N,_n,_s,_m,_l))
 
         sys.exit(1)
         return _insert_prob_list
@@ -383,8 +388,8 @@ class TakahashiAI(Player):
             return _prod
         _probability = 0.0
         _permN = perm(_N,_n*_s)
-        print("_mp region:",max(_l,_n*_s-_N+_m),_m)
-        print("_lp region:",_l,min(_m,_s))
+        print("_mp range= [",max(_l,_n*_s-_N+_m),":",_m,"]")
+        print("_lp range= [",_l,":",min(_m,_s),"]")
         for _mp in range(max(_l,_n*_s-_N+_m),_m+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
                 print("_mp,_lp:",_mp,_lp)
@@ -404,23 +409,18 @@ class TakahashiAI(Player):
         return _probability
 
     ### create all possible pattern for
-    # _n:  number of cards one has
-    # _mp: number of key cards to hand out
-    # _lp: numbef of people who has keycards
+    # _n:  maximum number of cards one has
+    # _mp: number of keycards to hand out
+    # _lp: maximum numbef of people who has keycards
     def __create_pattern(self,_n,_mp,_lp):
-        ###  create _list_of_list_of_pattern with small size
-        # _n: number of cards one can hold
-        # _mp: total number of keycard
-        # _lp: max number of people to distribute
-        # _total = _mp-lp (1st line is occupied for _lp people)
-        # _num_keycards_max = _mp-_lp (rest of keycards)
-        _list_of_list_of_pattern = [self.__make_tuple(_mp-_lp,min(_mp-_lp,_n-1))]
-        self.__break_tuple(_list_of_list_of_pattern,
-                copy.deepcopy(_list_of_list_of_pattern[0]),
-                _mp-_lp,
-                _n-1,
-                _lp)
-        # add 1 to all num_keycards to recover original size
+        _first_list = self.__make_tuple(_mp-_lp,min(_mp-_lp,_n-1))
+        _list_of_list_of_pattern = [copy.deepcopy(_first_list)]
+        if _first_list != []:
+            self.__break_tuple(_list_of_list_of_pattern,copy.deepcopy(_first_list),
+                    _mp-_lp, # number of keycards in small matrix
+                    _n-1, # maximum number of cards one has in small matrix
+                    _lp)
+            # add 1 to all num_keycards to recover original size
         self.__shift_keycard_num(_list_of_list_of_pattern,_lp)
         return _list_of_list_of_pattern
 
@@ -438,20 +438,22 @@ class TakahashiAI(Player):
     # create list of list of tuples with total _num numbers of cards to distribute
     # _mp: total number of keycards
     # _n: number of cards one can hold
-    # _lp: max number of people to distribute
+    # _lp: max number of people to distribute keycards
     def __break_tuple(self,_list_of_list_of_tuple,_current_list,_mp,_n,_lp):
 
         _numOfSet = 0
         while _current_list != [(1,_mp)]:
             if _numOfSet != len(_list_of_list_of_tuple):
-                _numOfSet += 1
+                _numOfSet = len(_list_of_list_of_tuple)
                 print("_numOfSet:",len(_list_of_list_of_tuple),
-                        "(_mp,_lp):",(_mp,_lp),":",
+                        "(_mp,_lp)=",(_mp,_lp),",",
                         (self.__sum_tuple(_current_list),self.__count_num_player(_current_list)),
                         "_current_list:",_current_list)
-            self.__break_tuple_core(_list_of_list_of_tuple,_current_list,_mp,_lp)
+            self.__break_tuple_core(_current_list,_mp,_lp)
+            if _current_list != [(1,_mp)]:
+                _list_of_list_of_tuple.append(_current_list)
 
-    def __break_tuple_core(self,_list_of_list_of_tuple,_current_list,_mp,_lp):
+    def __break_tuple_core(self,_current_list,_mp,_lp):
         # from bottom tuple check if breaking possible
         for (_num_keycards,_num_people) in _current_list[::-1]:
             del _current_list[-1]
@@ -460,11 +462,9 @@ class TakahashiAI(Player):
                     _current_list.append((_num_keycards,_num_people-1)) # add decreased tuple
                 _rest_mp = _mp - self.__sum_tuple(_current_list) # calculate _mp for lower tuple
                 _current_list += self.__make_tuple(_rest_mp,_num_keycards-1) # fill lower tuples
-                if self.__count_num_player(_current_list) <= _lp: # num_player criterion okey
-                    _list_of_list_of_tuple.append(_current_list)
-                else: # case where num_player exceed _lp
+                if self.__count_num_player(_current_list) > _lp: # num_player exceeds criterion _lp
                     self.__skip_tuple(_current_list,_mp,_lp)
-                break # loop ended here and return
+                return
 
     # create a list of tuple
     #   witch all needed cards are distributed
@@ -490,6 +490,14 @@ class TakahashiAI(Player):
             _sum += _tuple_list[_i][0]*_tuple_list[_i][1]
         return int((_mp - _sum)/_tuple_list[_irank][0])
 
+    # check at where the number of poeple exceed _lp
+    #   and skip those
+    # this return _current_list with appropriate list of tuple
+    #    which satisfies criterion num_people <= _lp
+    #    or if it does not exist, return (_mp,1)
+    # _current_list: input list
+    # _mp: number of keycards
+    # _lp: max number of people who has keycards
     def __skip_tuple(self,_current_list,_mp,_lp):
         _num_player = 0
         for _irank in range(len(_current_list)):
@@ -497,22 +505,25 @@ class TakahashiAI(Player):
             if _num_player > _lp:
                 if _irank > 0:
                     self.__dec_num_player(_current_list,_mp,_irank)
-                    return
+                    if self.__count_num_player(_current_list) > _lp:
+                        self.__skip_tuple(_current_list,_mp,_lp)
                 else:
                     # return [(1,_mp)] --- id unchanged by indirect substitution
                     del _current_list[:]
                     _current_list += self.__make_tuple(_mp,1)
-                    return
+                return
 
     # decrese number of player by one at _irank-th position
+    #   _current_list is updated
     # if _irank is not given, the last tuple will be the target
     # if number of player at _irank is 1, decrese number of player in former rank
     # the rest of list is filled by appropriate tuple by __make_tuple
+    #    __make_tuple takes total number of keycards and max number of keycards
+    # it does not check if number of people is small enough
     def __dec_num_player(self,_current_list,_mp,_irank=-1):
         (_num_keycard,_num_player) = _current_list[_irank]
         del _current_list[_irank:]
         if _num_keycard == 1:
-#            print("ERROR: pointed _irank is wrong. _current_list:",_current_list)
             return
         if _num_player == 1:
             if _current_list != []:
@@ -527,6 +538,7 @@ class TakahashiAI(Player):
             _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
 
     # decrese number of player by one at _irank-th position
+    #   _current_list is updated
     # if _irank is not given, the last tuple will be the target
     # if number of player at _irank is 1, create _num_keycard[_irank]-1 tuple or decrese _num_keycard[_irank-1] if _num_keycard[_irank-1] = _num_keycard[_irank]-1
     # the rest of list is filled by appropriate tuple by __make_tuple
