@@ -314,6 +314,7 @@ class TakahashiAI(Player):
         _num_each_cards = len(self.__my_cards_inst) # number of cards for each hand
         _num_players = self.__num_players -1 # number of players except myself
         _num_all_cards = len(self.__unknown_cards) # number of cards unknown
+        _insert_prob_list = []
         for card in self.__my_cards_inst:
             if card.category is 'h':
                 print("prior_cards:",card.prior_cards) # possible inserting cards
@@ -325,33 +326,9 @@ class TakahashiAI(Player):
                 print("s:",_num_players)
                 print("m:",_num_keycards)
                 print("l:",_num_pick_cards)
-#                _insert_prob.append(self.__calc_probability(
-#                    _num_all_cards,
-#                    _num_each_cards,
-#                    _num_players,
-#                    _num_keycards,
-#                    _num_pick_cards))
-#
-#                _insert_risk_list.append(self.__get_probability(_num_each_cards,_num_players,_num_keycards,_num_all_cards,_num_pick_cards))
-#            else:
-#                _insert_prob_list.append(None)
-#        print("cards:",self.__my_cards)
-#        print("prob:",_insert_prob_list)
-#        print("field:",self.__field)
-#        print("unknown:",self.__unknown_cards)
-
-#        mylist = [6,0,0,0,0,0]
-#        for i in range(8):
-#            print("mylist:",i,mylist)
-#            mylist = self.__shift(mylist)
-
-#        _list_of_list_of_tuple = [self.__make_tuple(7,7)]
-#        self.__break_tuple(_list_of_list_of_tuple,7)
-#        for i in _list_of_list_of_tuple:
-#            print(i)
-
-#        print("##### check __mek_rest_tuple")
-#        print(self.__make_tuple(7,2))
+                _insert_prob_list.append(self.__calc_probability(_num_all_cards,_num_each_cards,_num_players,_num_keycards,_num_pick_cards))
+#        print("insert_prob_list=",_insert_prob_list)
+#        return _insert_prob_list
 
 #        _current_list = self.__make_tuple(4,4)
 #        _list_of_current_list = [copy.deepcopy(_current_list)]
@@ -360,18 +337,15 @@ class TakahashiAI(Player):
 #        print("_list_of_current_list1:",_list_of_current_list)
 #        sys.exit(1)
 
-        _N = 30 # 90 # total number of cards
-        _n =  3 # 10 # number of cards one hold
-        _s =  4 # 8  # number of players
-        _m = 15 # 43 # number of key cards
-        _l =  4 # 4  # number of people who has keycard
-        #print("probability:",self.__calc_probability(30,3,4,12,4))
-#        print("probability:",self.__calc_probability(90,10,8,30,4))
-#        print("probability:",self.__calc_probability(90,10,8,43,4))
+        _N = 90 # 30 # 90 # total number of cards
+        _n = 10 #  3 # 10 # number of cards one hold
+        _s =  8 #  4 # 8  # number of players
+        _m =  3 # 15 # 43 # number of key cards
+        _l =  4 #  4 # 4  # number of people who has keycard
         print("probability:",self.__calc_probability(_N,_n,_s,_m,_l))
 
         sys.exit(1)
-        return _insert_prob_list
+#        return _insert_prob_list
 
     # calc probability
     # _N: total number of cards
@@ -380,7 +354,9 @@ class TakahashiAI(Player):
     # _m: total number of key cards (all has to be distributed)
     # _l: number of people who has keycard (no more or less)
     def __calc_probability(self,_N,_n,_s,_m,_l):
-        if _N < _n*_s or _m < _l or _s < _l:
+        if _m < _l: # number of keycards is smaller than number of people to be distributed
+            return 0
+        if _N < _n*_s  or _s < _l:
             print("ERROR: wrong combination in __get_probability2")
             sys.exit(1)
         def perm(_n,_r):
@@ -415,8 +391,8 @@ class TakahashiAI(Player):
 #                    print("probablity:",_prob)
                     _prob_m_l += _prob
                 _probability += _prob_m_l
-                print("probability of (_mp,_lp)=(",_mp,",",_lp,"), P=",_prob_m_l)
-                print(_list_of_list_of_pattern)
+#                print("probability of (_mp,_lp)=(",_mp,",",_lp,"), P=",_prob_m_l)
+#                print(_list_of_list_of_pattern)
         return _probability
 
     ### create all possible pattern for
