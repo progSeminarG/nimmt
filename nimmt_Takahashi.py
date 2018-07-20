@@ -392,8 +392,9 @@ class TakahashiAI(Player):
         print("_lp range= [",_l,":",min(_m,_s),"]")
         for _mp in range(max(_l,_n*_s-_N+_m),_m+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
-                print("_mp,_lp:",_mp,_lp)
+                print("calc probability of _mp,_lp:",_mp,_lp)
                 _list_of_list_of_pattern = self.__create_pattern(_n,_mp,_lp)
+                _prob_m_l = 0.0
                 for _list_of_pattern in _list_of_list_of_pattern:
 #                    print("_list_of_pattern:",_list_of_pattern)
                     _prod = prod(_n,_s,_list_of_pattern)
@@ -405,7 +406,9 @@ class TakahashiAI(Player):
 #                    print("_pem2:",_perm2)
 #                    print("_permN:",_permN)
 #                    print("probablity:",_prob)
-                    _probability += _prob
+                    _prob_m_l += _prob
+                _probability += _prob_m_l
+                print("probability of (_mp,_lp)=(",_mp,",",_lp,"), P=",_prob_m_l)
         return _probability
 
     ### create all possible pattern for
