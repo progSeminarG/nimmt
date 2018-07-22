@@ -327,9 +327,9 @@ class TakahashiAI(Player):
                 print("m:",_num_keycards)
                 print("l:",_num_pick_cards)
 # include following for implementation
-#                _insert_prob_list.append(self.__calc_probability(_num_all_cards,_num_each_cards,_num_players,_num_keycards,_num_pick_cards))
-#        print("insert_prob_list=",_insert_prob_list)
-#        return _insert_prob_list
+                _insert_prob_list.append(self.__calc_probability(_num_all_cards,_num_each_cards,_num_players,_num_keycards,_num_pick_cards))
+        print("insert_prob_list=",_insert_prob_list)
+        return _insert_prob_list
 
 ## test 1
 #        _current_list = self.__make_tuple(4,4)
@@ -339,19 +339,19 @@ class TakahashiAI(Player):
 #        print("_list_of_current_list1:",_list_of_current_list)
 #        sys.exit(1)
 
-# test 2
-        _N = 90 #90 # 30 # 90 # total number of cards
-        _n = 10 #10 #  3 # 10 # number of cards one hold
-        _s =  8 # 8 #  4 # 8  # number of players
-        _m = 76 # 3 # 15 # 43 # number of key cards
-        _l =  4 # 4 #  4 # 4  # number of people who has keycard
-        print("N:",_N)
-        print("n:",_n)
-        print("s:",_s)
-        print("m:",_m)
-        print("l:",_l)
-        print("probability:",self.__calc_probability(_N,_n,_s,_m,_l))
-        sys.exit(1)
+## test 2
+#        _N = 90 #90 # 30 # 90 # total number of cards
+#        _n = 10 #10 #  3 # 10 # number of cards one hold
+#        _s =  8 # 8 #  4 # 8  # number of players
+#        _m = 76 # 3 # 15 # 43 # number of key cards
+#        _l =  4 # 4 #  4 # 4  # number of people who has keycard
+#        print("N:",_N)
+#        print("n:",_n)
+#        print("s:",_s)
+#        print("m:",_m)
+#        print("l:",_l)
+#        print("probability:",self.__calc_probability(_N,_n,_s,_m,_l))
+#        sys.exit(1)
 
 ## test 3
 #        _current_list = [(9,3),(8,4)]
@@ -475,9 +475,7 @@ class TakahashiAI(Player):
     def __make_tuple(self,_total,_num_keycards_max): #,_num_people_max):
         if _total == 0: return []
         _tuple_list = []
-#        print("__make_tuple",_num_keycards_max)
         for _num_keycard in range(_num_keycards_max,0,-1):
-#            print(_num_keycard)
             _num_people = int(_total / _num_keycard)
             if _num_people > 0:
                 _total -= _num_keycard * _num_people
@@ -493,32 +491,6 @@ class TakahashiAI(Player):
             _sum += _tuple_list[_i][0]*_tuple_list[_i][1]
         return int((_mp - _sum)/_tuple_list[_irank][0])
 
-#    # check at where the number of poeple exceed _lp
-#    #   and skip those
-#    # this return _current_list with appropriate list of tuple
-#    #    which satisfies criterion num_people <= _lp
-#    #    or if it does not exist, return (_mp,1)
-#    # _current_list: input list
-#    # _mp: number of keycards
-#    # _lp: max number of people who has keycards
-#    def __skip_tuple(self,_current_list,_mp,_lp):
-##        print("skip1",_current_list,_mp,_lp,self.__sum_tuple(_current_list),self.__count_num_player(_current_list))
-#        _num_player = 0
-#        for _irank in range(len(_current_list)):
-#            _num_player += _current_list[_irank][1]
-#            if _num_player > _lp:
-##                print("num_player exceed. irank=",_irank)
-#                if _irank > 0:
-#                    self.__dec_num_player(_current_list,_mp,_irank)
-#                    if self.__count_num_player(_current_list) > _lp:
-##                        print("skip2")
-#                        self.__skip_tuple(_current_list,_mp,_lp)
-#                else:
-#                    # return [(1,_mp)] --- id unchanged by indirect substitution
-#                    del _current_list[:]
-#                    _current_list += self.__make_tuple(_mp,1)
-#                return
-    # non recursive version
     # check at where the number of poeple exceed _lp
     #   and skip those
     # this return _current_list with appropriate list of tuple
@@ -543,59 +515,6 @@ class TakahashiAI(Player):
                         del _current_list[:]
                         _current_list += self.__make_tuple(_mp,1)
                         return
-
-#    # revised version of above
-#    # check at where the number of poeple exceed _lp
-#    #   and skip those
-#    # this return _current_list with appropriate list of tuple
-#    #    which satisfies criterion num_people <= _lp
-#    #    or if it does not exist, return (_mp,1)
-#    # _current_list: input list
-#    # _mp: number of keycards
-#    # _lp: max number of people who has keycards
-#    def __skip_tuple(self,_current_list,_mp,_lp):
-##        print("skip1",_current_list,_mp,_lp,self.__sum_tuple(_current_list),self.__count_num_player(_current_list))
-#        _num_player = self.__count_num_player(_current_list)
-#        if _num_player > _lp:
-##            print("num_player exceeded:", _num_player, _lp)
-#            del _current_list[:]
-#            _current_list += self.__make_tuple(_mp,1)
-        
-#    # decrese number of player by one at _irank-th position
-#    #   _current_list is updated
-#    # if _irank is not given, the last tuple will be the target
-#    # if number of keycard at _irank is 1, delete last tuple and return
-#    # if number of player at _irank is 1, decrese number of player in former rank
-#    # the rest of list is filled by appropriate tuple by __make_tuple
-#    #    __make_tuple takes total number of keycards and max number of keycards
-#    # it does not check if number of people is small enough
-##    sys.setrecursionlimit(10000)
-#    def __dec_num_player(self,_current_list,_mp,_irank=-1,num_rec=0):
-#        print("@decnumplayer:",_current_list,"irank:",_irank,"num_rec:",num_rec)
-#        if num_rec > 100:
-#            print("error recursion")
-#            sys.exit(1)
-#        if _current_list == [(1,_mp)]: return
-#        (_num_keycard,_num_player) = _current_list[_irank]
-#        del _current_list[_irank:] # delete tuples _irank to end
-#        if _num_keycard == 1:
-#            print("num_rec=",num_rec)
-#            self.__dec_num_player(_current_list,_mp,num_rec=num_rec+1)
-#            return
-#        if _num_player == 1:
-#            if _current_list != []:
-#                print("num_rec=",num_rec)
-#                self.__dec_num_player(_current_list,_mp,len(_current_list)-1,num_rec=num_rec+1)
-#            else:
-#                _current_list += self.__make_tuple(_mp,_num_keycard-1)
-#                print("num_rec=",num_rec)
-#                self.__dec_num_player(_current_list,_mp,num_rec=num_rec+1)
-#            return
-#        else:
-#            _current_list.append((_num_keycard,_num_player-1))
-#            _rest_mp = _mp - self.__sum_tuple(_current_list)
-#            _current_list += self.__make_tuple(_rest_mp,_num_keycard-1)
-#            return
 
     # non recursive version
     # decrese number of player by one at _irank-th position
