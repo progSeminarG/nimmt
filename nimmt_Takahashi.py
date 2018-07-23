@@ -261,6 +261,10 @@ class TakahashiAI(Player):
         self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
 #        print(self.__get_probability(2,2,2,4,2))
         _num_try = 100
+        _sample_list = [i for i in range(100)]
+        print(self.__get_score_ordered_list(_sample_list))
+        print(_sample_list)
+        sys.exit(1)
         print(self.__get_score_ordered_list(self.__unknown_cards))
         print("insert prob:",self.__get_insert_risk())
         sys.exit(1)
@@ -303,6 +307,7 @@ class TakahashiAI(Player):
                 /factorial(_num_all_cards)
 
 
+    # return _list_of_cards that is in order of high score
     def __get_score_ordered_list(self,_list_of_cards):
         _score = [Card.get_score(i) for i in _list_of_cards]
         return sorted(_list_of_cards,key=lambda card:_score[_list_of_cards.index(card)],reverse=True)
@@ -317,6 +322,8 @@ class TakahashiAI(Player):
         _insert_prob_list = []
         for card in self.__my_cards_inst:
             if card.category is 'h':
+                _column = card.column
+                _field_score = self.__field_inst.field_score 
                 print("prior_cards:",card.prior_cards) # possible inserting cards
                 _num_keycards = len(card.prior_cards) # number of keycards
                 _num_pick_cards = card.num_space
