@@ -162,18 +162,17 @@ class Card(object):
             self.__position = _my_position_lseq \
                 - _left_position_lseq \
                 + self.__num_cards_column[self.__column] -1
-            print("num_max_column:",self.__num_max_column)
-            print("self.__num_cards_column:",self.__num_cards_column[self.__column])
+#            print("num_max_column:",self.__num_max_column)
+#            print("self.__num_cards_column:",self.__num_cards_column[self.__column])
             self.__num_space = self.__num_max_column - self.__num_cards_column[self.__column]
             self.__prior_cards = copy.deepcopy(_local_sequence[_left_position_lseq+1:_my_position_lseq])
-            print("me:",self.__number)
-            print("unknown:",self.__unknown_cards)
-            print("field:",self.__field_inst.field)
-            print("prior:",self.__prior_cards)
-            print("category:", self.__category)
-            print("column:", self.__column)
-            print("position:", self.__position)
-            #sys.exit(1)
+#            print("me:",self.__number)
+#            print("unknown:",self.__unknown_cards)
+#            print("field:",self.__field_inst.field)
+#            print("prior:",self.__prior_cards)
+#            print("category:", self.__category)
+#            print("column:", self.__column)
+#            print("position:", self.__position)
 
     @staticmethod
     def get_score(_num):
@@ -259,16 +258,20 @@ class TakahashiAI(Player):
         self.get_field()
         self.__field_inst.update(field=self.__field)
         self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
-#        print(self.__get_probability(2,2,2,4,2))
-        _num_try = 100
-        _sample_list = [i for i in range(100)]
-        print(self.__get_score_ordered_list(_sample_list))
-        print(_sample_list)
-        sys.exit(1)
-        print(self.__get_score_ordered_list(self.__unknown_cards))
-        print("insert prob:",self.__get_insert_risk())
-        sys.exit(1)
-        return self.__put_card_by_demo(_num_try)
+        for card in self.__my_cards_inst:
+            card.update(field_inst=self.__field_inst,unknown_cards=self.__update_unknown_cards)
+
+#        print("card number:",self.__my_cards)
+        putcard_risk = self.__put_card_by_risk()
+#        putcard_demo = self.__put_card_by_demo(100)
+#        if putcard_risk != putcard_demo:
+#            print("conflict occured!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+#            print("unknown:",self.__unknown_cards)
+#            print("putcar_risk,demo=",putcard_risk,putcard_demo)
+#            self.__my_cards.remove(putcard_risk)
+#            self.__my_cards.append(putcard_demo)
+        return putcard_risk
+        #return 
 
     def __put_card_by_demo(self,num_try):
         _score_for_my_cards = []
@@ -278,33 +281,41 @@ class TakahashiAI(Player):
         _min_index = _score_for_my_cards.index(min(_score_for_my_cards))
         return self.__my_cards.pop(_min_index)
 
-    def __get_probability(self,_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards):
-        _nfact = factorial(_num_each_cards)
-        _num_more = _num_pick_cards%_num_players
-        print("#####")
-        print(_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards)
-        print(float(_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players)))**(_num_more))
-#        print("in 1:",_nfact,_num_each_cards,ceil(_num_pick_cards/_num_players),_num_more)
-        print(float(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players)))**(_num_players-_num_more))
-        print(comb(_num_key_cards,_num_pick_cards))
-        print(float(factorial(_num_pick_cards)))
-        print(float(factorial(_num_all_cards-_num_pick_cards)/factorial(_num_all_cards-_num_each_cards*_num_players)))
-        print(comb(_num_players,_num_more))
-        print(float(factorial(_num_all_cards)))
-        print("prob:",_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players))**(_num_more)*(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players)))**(_num_players-_num_more)*comb(_num_key_cards,_num_pick_cards)*factorial(_num_pick_cards)*factorial(_num_all_cards-_num_pick_cards)/factorial(_num_all_cards-_num_each_cards*_num_players)*comb(_num_players,_num_more)/factorial(_num_all_cards))
+    def __put_card_by_risk(self):
+        if len(self.__my_cards_inst) > 1:
+            _score_for_my_cards = self.__get_insert_risk()
+            _min_index = _score_for_my_cards.index(min(_score_for_my_cards))
+            return self.__my_cards_inst.pop(_min_index).number
+        else:
+            return self.__my_cards_inst.pop(0).number
 
-
-        print("####/")
-        return (_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players))) \
-                **(_num_more) \
-                *(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players))) \
-                **(_num_players-_num_more) \
-                *comb(_num_key_cards,_num_pick_cards) \
-                *factorial(_num_pick_cards) \
-                *factorial(_num_all_cards-_num_pick_cards) \
-                /factorial(_num_all_cards-_num_each_cards*_num_players) \
-                *comb(_num_players,_num_more) \
-                /factorial(_num_all_cards)
+#    def __get_probability(self,_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards):
+#        _nfact = factorial(_num_each_cards)
+#        _num_more = _num_pick_cards%_num_players
+#        print("#####")
+#        print(_num_each_cards,_num_players,_num_key_cards,_num_all_cards,_num_pick_cards)
+#        print(float(_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players)))**(_num_more))
+##        print("in 1:",_nfact,_num_each_cards,ceil(_num_pick_cards/_num_players),_num_more)
+#        print(float(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players)))**(_num_players-_num_more))
+#        print(comb(_num_key_cards,_num_pick_cards))
+#        print(float(factorial(_num_pick_cards)))
+#        print(float(factorial(_num_all_cards-_num_pick_cards)/factorial(_num_all_cards-_num_each_cards*_num_players)))
+#        print(comb(_num_players,_num_more))
+#        print(float(factorial(_num_all_cards)))
+#        print("prob:",_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players))**(_num_more)*(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players)))**(_num_players-_num_more)*comb(_num_key_cards,_num_pick_cards)*factorial(_num_pick_cards)*factorial(_num_all_cards-_num_pick_cards)/factorial(_num_all_cards-_num_each_cards*_num_players)*comb(_num_players,_num_more)/factorial(_num_all_cards))
+#
+#
+#        print("####/")
+#        return (_nfact/factorial(_num_each_cards-ceil(_num_pick_cards/_num_players))) \
+#                **(_num_more) \
+#                *(_nfact/factorial(_num_each_cards-floor(_num_pick_cards/_num_players))) \
+#                **(_num_players-_num_more) \
+#                *comb(_num_key_cards,_num_pick_cards) \
+#                *factorial(_num_pick_cards) \
+#                *factorial(_num_all_cards-_num_pick_cards) \
+#                /factorial(_num_all_cards-_num_each_cards*_num_players) \
+#                *comb(_num_players,_num_more) \
+#                /factorial(_num_all_cards)
 
 
     # return _list_of_cards that is in order of high score
@@ -313,30 +324,59 @@ class TakahashiAI(Player):
         return sorted(_list_of_cards,key=lambda card:_score[_list_of_cards.index(card)],reverse=True)
 
     def __get_insert_risk(self):
-        _insert_risk_list = []
         _insert_prob = []
         _score_of_lines = []
         _num_each_cards = len(self.__my_cards_inst) # number of cards for each hand
         _num_players = self.__num_players -1 # number of players except myself
         _num_all_cards = len(self.__unknown_cards) # number of cards unknown
         _insert_prob_list = []
+        _worst_score_list = []
+        _average_score_list = []
         for card in self.__my_cards_inst:
             if card.category is 'h':
                 _column = card.column
-                _field_score = self.__field_inst.field_score 
-                print("prior_cards:",card.prior_cards) # possible inserting cards
+                _field_score = self.__field_inst.field_score[_column]
+#                print("prior_cards:",card.prior_cards) # possible inserting cards
                 _num_keycards = len(card.prior_cards) # number of keycards
-                _num_pick_cards = card.num_space
-                print("#:",card.number)
-                print("N:",_num_all_cards)
-                print("n:",_num_each_cards)
-                print("s:",_num_players)
-                print("m:",_num_keycards)
-                print("l:",_num_pick_cards)
-# include following for implementation
-                _insert_prob_list.append(self.__calc_probability(_num_all_cards,_num_each_cards,_num_players,_num_keycards,_num_pick_cards))
-        print("insert_prob_list=",_insert_prob_list)
-        return _insert_prob_list
+                _num_pick_cards = card.num_space # if target field is [3][5][8] then 2
+                _worst_case_card_list = self.__get_score_ordered_list(card.prior_cards)[0:_num_pick_cards]
+                _worst_case_score = _field_score + Field.calc_score(_worst_case_card_list)
+                if _num_keycards >= _num_pick_cards > 0:
+                    _average_score = _field_score + Field.calc_score(card.prior_cards)/float(_num_keycards)*(_num_pick_cards)
+                else:
+                    _average_score = _field_score + Field.calc_score(card.prior_cards)
+#                print("worst list:",_worst_case_card_list)
+#                print("unknown:",self.__get_score_ordered_list(self.__unknown_cards))
+#                print("number:", card.number)
+#                print("field left:",card.left_neighbor)
+#                print("worst_case_score:",_worst_case_score)
+#                print("#:",card.number)
+#                print("N:",_num_all_cards)
+#                print("n:",_num_each_cards)
+#                print("s:",_num_players)
+#                print("m:",_num_keycards)
+#                print("l:",_num_pick_cards)
+                _insert_prob_list.append(self.__calc_probability(
+                    _num_all_cards,
+                    _num_each_cards,
+                    _num_players,
+                    _num_keycards,
+                    _num_pick_cards)
+                    )
+                _worst_score_list.append(_worst_case_score)
+                _average_score_list.append(_average_score)
+            else:
+                _insert_prob_list.append(1.0)
+                _worst_score_list.append(min(self.__field_inst.field_score))
+                _average_score_list.append(min(self.__field_inst.field_score))
+        _insert_risk_list = [_insert_prob_list[i]*_worst_score_list[i] for i in range(len(_insert_prob_list))]
+        #_insert_risk_list = [_insert_prob_list[i]*_average_score_list[i] for i in range(len(_insert_prob_list))]
+#        self.__printlist(pre="my cards:          ",list=[self.__my_cards_inst[i].number for i in range(len(self.__my_cards_inst))],form=" {:5d}")
+#        self.__printlist(pre="insert_prob_list=  ",list=_insert_prob_list,form=" {:5.2f}")
+#        self.__printlist(pre="worst_score_list=  ",list=_worst_score_list,form=" {:5.2f}")
+#        self.__printlist(pre="average_score_list=",list=_average_score_list,form=" {:5.2f}")
+#        self.__printlist(pre="insert_risk_list=  ",list=_insert_risk_list,form=" {:5.2f}")
+        return _insert_risk_list
 
     # calc probability
     # _N: total number of cards
@@ -362,8 +402,8 @@ class TakahashiAI(Player):
             return _prod
         _probability = 0.0
         _permN = perm(_N,_n*_s)
-        print("_mp range= [",max(_l,_n*_s-_N+_m),":",min(_m,_n*_s),"]")
-        print("_lp range= [",_l,":",min(_m,_s),"]")
+#        print("_mp range= [",max(_l,_n*_s-_N+_m),":",min(_m,_n*_s),"]")
+#        print("_lp range= [",_l,":",min(_m,_s),"]")
         for _mp in range(max(_l,_n*_s-_N+_m),min(_m,_n*_s)+1): # number of distributing key cards
             for _lp in range(_l,min(_mp,_s)+1): # number of people 
 #                print("calc probability of (_mp,_lp)=(",_mp,",",_lp,")->(",_mp-_lp,",",_lp,")")
@@ -693,3 +733,9 @@ class TakahashiAI(Player):
     def __get_field_score(self,_field): # calculate scores of each column
         return [Field.calc_score(_field[i]) for i in range(self.__num_field)]
 
+    def __printlist(self,list=[],form="{}",pre="",post="",sep=","):
+        print(pre,end="")
+        for i in range(len(list)-1):
+            print(form.format(list[i]),end=sep)
+        print(form.format(list[-1]),end="")
+        print(post)
