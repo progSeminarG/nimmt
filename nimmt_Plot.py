@@ -16,17 +16,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-df = pd.read_csv(output,header=0,encoding='utf-8')#make dataframe
+dataset = pd.read_csv(output,header=0,encoding='utf-8')#make dataframe
 f=open(output,"a")
 f.write("average:,")
 average=list(range(len(players_list)))#initial
 for i in range(len(players_list)-1):
-    data_list=df.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
+    data_list=dataset.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
     ave=sum(data_list) / len(data_list)
     average[i]=ave
     avest=str(ave)
     f.write(avest+",")
-data_list=df.iloc[0:NUM_GAME+1,len(players_list)].values.tolist()#端にカンマを入れさせない
+data_list=dataset.iloc[0:NUM_GAME+1,len(players_list)].values.tolist()#端にカンマを入れさせない
 ave=sum(data_list) / len(data_list)
 average[len(players_list)-1]=ave
 avest=str(ave)
@@ -38,12 +38,12 @@ for k in range(len(players_list)):
     ss=str(k)
     f.write("num_"+ ss + ":, ")
     for i in range(len(players_list)-1):
-        data_list=df.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
+        data_list=dataset.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
         count=data_list.count(k)
         ct=str(count)
         f.write(ct)
         f.write(",")
-    data_list=df.iloc[0:NUM_GAME+1,len(players_list)].values.tolist()#端にカンマを入れさせない
+    data_list=dataset.iloc[0:NUM_GAME+1,len(players_list)].values.tolist()#端にカンマを入れさせない
     count=data_list.count(k)
     ct=str(count)
     f.write(ct)
@@ -52,7 +52,7 @@ f.close()
 
 ct1st=list(range(len(players_list)))#initial
 for i in range(len(players_list)):
-    data_list=df.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
+    data_list=dataset.iloc[0:NUM_GAME+1,i+1].values.tolist()#CSVの列をリストで取り出す
     ct1st[i]=data_list.count(0)
 
 
