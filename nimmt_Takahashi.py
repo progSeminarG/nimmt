@@ -317,7 +317,6 @@ class TakahashiAI(Player):
 #                *comb(_num_players,_num_more) \
 #                /factorial(_num_all_cards)
 
-
     # return _list_of_cards that is in order of high score
     def __get_score_ordered_list(self,_list_of_cards):
         _score = [Card.get_score(i) for i in _list_of_cards]
@@ -369,8 +368,8 @@ class TakahashiAI(Player):
                 _insert_prob_list.append(1.0)
                 _worst_score_list.append(min(self.__field_inst.field_score))
                 _average_score_list.append(min(self.__field_inst.field_score))
-        _insert_risk_list = [_insert_prob_list[i]*_worst_score_list[i] for i in range(len(_insert_prob_list))]
-        #_insert_risk_list = [_insert_prob_list[i]*_average_score_list[i] for i in range(len(_insert_prob_list))]
+        #_insert_risk_list = [_insert_prob_list[i]*_worst_score_list[i] for i in range(len(_insert_prob_list))]
+        _insert_risk_list = [_insert_prob_list[i]*_average_score_list[i] for i in range(len(_insert_prob_list))]
 #        self.__printlist(pre="my cards:          ",list=[self.__my_cards_inst[i].number for i in range(len(self.__my_cards_inst))],form=" {:5d}")
 #        self.__printlist(pre="insert_prob_list=  ",list=_insert_prob_list,form=" {:5.2f}")
 #        self.__printlist(pre="worst_score_list=  ",list=_worst_score_list,form=" {:5.2f}")
