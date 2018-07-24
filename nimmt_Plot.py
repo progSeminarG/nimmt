@@ -61,3 +61,5 @@ class ReadPlot(object):
         # save as png
         plt.savefig(self.__figfile)
 
+        print("data plotted:",self.__figfile)
+

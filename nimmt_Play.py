@@ -3,6 +3,7 @@
 # NUM_GAME (下に定義) の回数一気に python で実行するスクリプト
 
 import argparse
+import time
 
 class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,argparse.MetavarTypeHelpFormatter):
     pass
@@ -102,9 +103,19 @@ players_list = [player0, player1, player2, player3, player4, player5, player6, p
 ### create game and play ###
 game = Game(players_list)
 NUM_GAME = args.num_game
+_time_start = time.time()
 for i in range(NUM_GAME):
     game.play()
 del game
+_time_finish = time.time()
+_time_spent = _time_finish - _time_start
+_time_hour = int(_time_spent / 3600)
+_time_spent -= _time_hour * 3600
+_time_min = int(_time_spent/60)
+_time_spent -= _time_min * 60
+_time_sec = int(_time_spent)
+print("time spent for {:>d} games: {:>d} h {:>d} min {:>d} sec.".format(NUM_GAME,_time_hour,_time_min,_time_sec))
+print("data saved:",args.outfile)
 
 from nimmt_Plot import ReadPlot
 ### plot data ###
