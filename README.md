@@ -27,18 +27,12 @@
 `self.dealer.score` 現在のスコア  
 
 ## ゲームの実行
-`python3 nimmt.py` : 1 ゲーム
-`python3 nimmtPack.py` : 1000 ゲーム (変更可能)
+`python3 nimmt_Play.py` : 1 ゲーム実行  
+`python3 nimmt_Play.py --num x` : x ゲーム実行
 
-## 解析ツールの使い方
-**必要条件**  
-GNU の getopt が使えること  
-### 複数回のゲーム実行
-**実行方法**  
-`sh play_nimmt.sh [オプション] [パラメーター]`  
-`-h` オプションで、ヘルプが出るので参照。  
-または、_nimmtPack.py_ を実行。
-### ゲーム結果の統計処理
-**実行方法**  
-`python3 format_score.py [オプション]`  
-`-h` オプションで、ヘルプが出るので参照。
+## できるデータ (同名ファイルは上書きされるので注意)
+**stat.csv** (各ゲームの結果: ファイル名は `python3 nimmt_Play.py --out xxx` で変更可能)  
+**stat.png** (各ゲームの結果のグラフ: ファイル名は `python3 nimmt_Play.py --fig xxx` で変更可能)
+
+## ヘルプ
+`python3 nimmt_Play.py --help`
