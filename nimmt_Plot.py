@@ -29,7 +29,8 @@ class ReadPlot(object):
 
     def plot(self):
         fig, ax = plt.subplots() # create plot space and axis
-        plt.rcParams["font.size"] = 5 # font size
+        plt.rcParams["font.size"] = 7 # font size except ticks
+        plt.tick_params(labelsize=7) # font size of ticks
         fig.subplots_adjust(bottom=0.2) # modify bottom margin
         plt.ylim([0,self.__num_games]) # y-range
         _xticks = [i for i in range(self.__num_players)] # x-tics = [0, 1, 2, ...]
