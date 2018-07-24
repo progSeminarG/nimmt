@@ -4,6 +4,7 @@ import argparse
 import time
 import contextlib
 import sys
+from progressbar import ProgressBar
 
 class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,argparse.MetavarTypeHelpFormatter):
     pass
@@ -129,9 +130,11 @@ import sys
 game = Game(players_list)
 NUM_GAME = args.num_game
 _time_start = time.time()
+progress = ProgressBar(0,NUM_GAME)
 for i in range(NUM_GAME):
     with silence(args.quiet):
         game.play()
+    progress.update(i)
 del game
 _time_finish = time.time()
 _time_spent = _time_finish - _time_start
