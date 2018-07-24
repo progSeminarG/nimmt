@@ -63,18 +63,12 @@ class Game(object):
                     for j in range(igame):
                         print('{:>4}'.format(game_score[j][i]),end='')
                     print()
+                # export data to file
                 scorelist = ""
                 for iplayer in range(len(players_list)):
                     scorelist += str(ranking.index(iplayer)) + ", "
                 scorelist = scorelist[:-2] + "\n"
                 self.file.write(scorelist)
-#                for i in range(len(players_list)-1):
-#                    rank = str(ranking.index(i))
-#                    self.file.write(rank)
-#                    self.file.write(",")
-#                rank = str(ranking.index(len(players_list)-1))
-#                self.file.write(rank)
-#                self.file.write("\n")
                 break
 
 ### 継承クラス (ここで基本クラスを継承して、様々な処理を行う) ###
@@ -94,7 +88,7 @@ from nimmt_Muto import MutoAI
 ### create players ###
 player0 = TakahashiAI()
 player1 = SakuraiAI()
-player2 = Player() #HoizumiAI()
+player2 = HoizumiAI()
 player3 = TakaiAI()
 player4 = HiraiAI()
 player5 = KawadaAI()
@@ -103,96 +97,18 @@ player7 = KikuchiAI()
 player8 = MutoAI()
 #player9 = Player()
 
-#players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
-players_list = [player1, player2, player3, player4, player5, player6, player7, player8]
+players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
+### create game and play ###
 game = Game(players_list)
 NUM_GAME = args.num_game
 for i in range(NUM_GAME):
     game.play()
 del game
 
-import numpy
-import pandas
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import sys
-
-
-# create formatted printing string
-# pre: insert string in head
-# list: printing 1D list
-# sep: printing separater
-# post: insert string in the end
-# form: format of printing list
-def __convert_string(pre="",list=[],sep=", ",post="",form="{:5.2f}"):
-    _string = pre
-    _sep_len = len(sep)
-    for i in list:
-        _string += str(form.format(i)) + sep
-    _string = _string[:-_sep_len]
-    _string += post
-    return _string
-
-# import datafile
-datafile = pandas.read_csv(args.outfile,header=0,encoding='utf-8')
-# calculate statistic values
-average_list = __convert_string(pre="average: ", list=list(datafile.mean()),post="\n")
-std_list     = __convert_string(pre="std:     ", list=list(datafile.std(ddof=False)),post="\n") # option: ddot=False -> 1/n, ddot=True -> 1/(n-1)
-
-### create ploting data list ###
-# format
-_players_list = list(datafile.columns)
-# xticks
-xticks = [i for i in range(len(_players_list))]
-xlabel = _players_list
-# y[0], y[1], ...
-_bottom = [0 for i in range(len(_players_list))]
-plt.rcParams["font.size"] = 7
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-for i in range(len(_players_list)):
-    _list = []
-    for player in _players_list:
-        _count_rank = (datafile[player]==i).sum()
-        _list.append(_count_rank)
-    ax.bar(xticks, _list, tick_label=xlabel, bottom=_bottom, align="center", label=str(i))
-    _bottom = [_bottom[i]+_list[i] for i in range(len(_players_list))]
-handles, labels = ax.get_legend_handles_labels()
-ax.legend(handles[::-1], labels[::-1], title='Line', loc='upper left')
-
-plt.legend()
-# save as png
-plt.savefig(args.figfile)
-
-
-#plt.show()
-sys.exit(1)
-
-updatefile = open(args.outfile,"a")
-updatefile.write(average_list)
-updatefile.write(std_list)
-
-#for player in players_list:
-
-print(datafile["SakuraiAI"])
-print(datafile["SakuraiAI"].value_counts().sort_index())
-print(dict(datafile["SakuraiAI"].value_counts().sort_index()))
-
-mylist=datafile["SakuraiAI"] == 0
-print(mylist)
-print(mylist.sum())
-
-print("aaa")
-print((datafile["SakuraiAI"]==0).sum())
-
-sys.exit(1)
-print(datafile)
-print(type(datafile))
-print(type(datafile.mean()))
-
-
-
+from nimmt_Plot import ReadPlot
+### plot data ###
+stat_inst = ReadPlot(datafile=args.outfile,figfile=args.figfile)
+stat_inst.plot()
 
 
