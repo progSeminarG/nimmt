@@ -1,9 +1,9 @@
 #!/usr/local/bin/python3
 
-# NUM_GAME (下に定義) の回数一気に python で実行するスクリプト
-
 import argparse
 import time
+import contextlib
+import sys
 
 class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,argparse.MetavarTypeHelpFormatter):
     pass
@@ -13,11 +13,32 @@ parser = argparse.ArgumentParser(description="play nimmt.", formatter_class=Cust
 parser.add_argument('--num', type=int, dest='num_game', nargs='?', default=1, help="number of game")
 parser.add_argument('--out', type=str, dest='outfile', nargs='?', default='stat.csv', help="output file")
 parser.add_argument('--fig', type=str, dest='figfile', nargs='?', default='stat.png', help="output figure file (png)")
+parser.add_argument('-q', '--quiet', action="store_true", help='reduce print sequence')
 
 args = parser.parse_args()
 
+@contextlib.contextmanager
+def silence(flagquiet):
+    if flagquiet:
+        __stdout_original = sys.stdout
+        nullfile = open(os.devnull, 'w')
+        sys.stdout = nullfile
+        try:
+            yield
+        finally:
+            sys.stdout = __stdout_original
+    else:
+        try:
+            yield
+        finally:
+            pass
+
 class Game(object):
     def __init__(self,players):
+#        if args.quiet:
+#            self.__stdout_original = sys.stdout
+#            nullfile = open(os.devnull,'w')
+#            sys.stdout = nullfile
         self.SCORE_THRESH = 66
         self.players_list = players
         self.file = open(args.outfile,"w+")
@@ -29,6 +50,7 @@ class Game(object):
 
     def __del__(self):
         self.file.close()
+#        if args.quiet: sys.stdout = self.__stdout_original
 
     def play(self):
         game_score = []
@@ -100,12 +122,16 @@ player8 = MutoAI()
 
 players_list = [player0, player1, player2, player3, player4, player5, player6, player7, player8]
 
+import os
+import sys
+
 ### create game and play ###
 game = Game(players_list)
 NUM_GAME = args.num_game
 _time_start = time.time()
 for i in range(NUM_GAME):
-    game.play()
+    with silence(args.quiet):
+        game.play()
 del game
 _time_finish = time.time()
 _time_spent = _time_finish - _time_start
