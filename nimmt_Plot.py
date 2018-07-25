@@ -32,6 +32,7 @@ class ReadPlot(object):
         plt.rcParams["font.size"] = 7 # font size except ticks
         plt.tick_params(labelsize=7) # font size of ticks
         fig.subplots_adjust(bottom=0.2) # modify bottom margin
+        excel_color_list = ['#4E72BE','#DE8244','#A5A5A5','#F5C142','#699AD0','#7EAA55','#2C4474','#934C20','#626362','#937324']
         plt.ylim([0,self.__num_games]) # y-range
         _xticks = [i for i in range(self.__num_players)] # x-tics = [0, 1, 2, ...]
         _xlabel = [self.__players_name_list[i] for i in self.__ranking] # x-label (list of names)
@@ -44,7 +45,7 @@ class ReadPlot(object):
                 _list.append(_count_rank) # append to _list
             # plot bar-graph.
             # x-position, y-height, x-label, offset, align, label for legend
-            ax.bar(_xticks, _list, tick_label=_xlabel, bottom=_bottom, align="center", label=str(ith))
+            ax.bar(_xticks, _list, tick_label=_xlabel, bottom=_bottom, align="center", label=str(ith), color=excel_color_list[ith])
             for j in range(len(_list)):
                 if _list[j] >= self.__num_games*0.04: # if there is a space in bin
                     # print number of ith-game
@@ -55,7 +56,7 @@ class ReadPlot(object):
         ax.text(-1,-self.__num_games*0.15,'std.',ha='center',va='center') # print 'std.'
         # print ave. and std. for each player
         for i in range(self.__num_players):
-            ax.text(_xticks[i],-self.__num_games*0.11,self.__average_list[self.__ranking[i]],ha='center',va='center')
+            ax.text(_xticks[i],-self.__num_games*0.11,'{:.2f}'.format(self.__average_list[self.__ranking[i]]),ha='center',va='center')
             ax.text(_xticks[i],-self.__num_games*0.16,'{:.2f}'.format(self.__std_list[self.__ranking[i]]),ha='center',va='center')
         # set legend format
         ax.legend(bbox_to_anchor=(0.,1.,1.,0.05),ncol=self.__num_players,borderaxespad=0.,mode='expand',edgecolor='None')
