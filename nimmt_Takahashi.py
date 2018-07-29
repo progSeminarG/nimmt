@@ -229,6 +229,9 @@ class Card(object):
 
 class TakahashiAI(Player):
 
+    def __init__(self,irisk_switch=4):
+        self.__irisk_switch = irisk_switch
+
     def get_know_dealer(self,dealer_input):
         self.__dealer = dealer_input
         self.__num_field = self.__dealer.num_field # 4
@@ -245,13 +248,14 @@ class TakahashiAI(Player):
         self.__update_unknown_cards(list(chain.from_iterable(self.__field)))
 
     def get_hand(self,my_cards_input):
-        self.__my_cards = my_cards_input
-        self.__my_cards.sort(reverse=True)
-        self.__my_original_cards = copy.deepcopy(self.__my_cards)
-        self.__update_unknown_cards(self.__my_cards)
+        self.__ith_turn = 0
+        _my_cards = my_cards_input
+        _my_cards.sort(reverse=True)
+        self.__my_original_cards = copy.deepcopy(_my_cards)
+        self.__update_unknown_cards(_my_cards)
         self.__my_cards_inst = [
-                Card(self.__my_cards[i],self.__field_inst,self.__unknown_cards)
-                for i in range(len(self.__my_cards))
+                Card(_my_cards[i],self.__field_inst,self.__unknown_cards)
+                for i in range(len(_my_cards))
                 ]
 
     def put_card(self):
@@ -261,25 +265,21 @@ class TakahashiAI(Player):
         for card in self.__my_cards_inst:
             card.update(field_inst=self.__field_inst,unknown_cards=self.__update_unknown_cards)
 
-#        print("card number:",self.__my_cards)
-        putcard_risk = self.__put_card_by_risk()
-#        putcard_demo = self.__put_card_by_demo(100)
-#        if putcard_risk != putcard_demo:
-#            print("conflict occured!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-#            print("unknown:",self.__unknown_cards)
-#            print("putcar_risk,demo=",putcard_risk,putcard_demo)
-#            self.__my_cards.remove(putcard_risk)
-#            self.__my_cards.append(putcard_demo)
-        return putcard_risk
-        #return 
+        if self.__ith_turn >= self.__irisk_switch:
+            putcard = self.__put_card_by_risk()
+        else:
+            putcard = self.__put_card_by_demo(100)
+
+        self.__ith_turn += 1
+        return putcard
 
     def __put_card_by_demo(self,num_try):
         _score_for_my_cards = []
-        for _card in self.__my_cards:
-            _score_summed = self.__play_random_pack(_card,num_try)
+        for _card in self.__my_cards_inst:
+            _score_summed = self.__play_random_pack(_card.number,num_try)
             _score_for_my_cards.append(_score_summed)
         _min_index = _score_for_my_cards.index(min(_score_for_my_cards))
-        return self.__my_cards.pop(_min_index)
+        return self.__my_cards_inst.pop(_min_index).number
 
     def __put_card_by_risk(self):
         if len(self.__my_cards_inst) > 1:
@@ -698,16 +698,16 @@ class TakahashiAI(Player):
         _field_score = self.__get_field_score(self.__field)
         return _field_score.index(min(_field_score))
 
-    def __divide_hands(self):
-        # need: __most_right_field
-        self.__min_field = min(self.__most_right_field)
-        self.__lower_hand = []
-        self.__upper_hand = []
-        for i in self.__my_cards: # __my_cards already sorted
-            if i < self.__min_field:
-                self.__lower_hand.append(i)
-            else:
-                self.__upper_hand.append(i)
+#    def __divide_hands(self):
+#        # need: __most_right_field
+#        self.__min_field = min(self.__most_right_field)
+#        self.__lower_hand = []
+#        self.__upper_hand = []
+#        for i in self.__my_cards: # __my_cards already sorted
+#            if i < self.__min_field:
+#                self.__lower_hand.append(i)
+#            else:
+#                self.__upper_hand.append(i)
 
     def __calc_trap_risk(self): # risk given by positive int (higher: risky)
         __trap_thresh = 4
