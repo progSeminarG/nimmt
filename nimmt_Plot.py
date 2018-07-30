@@ -6,6 +6,7 @@ import pandas
 import matplotlib
 import matplotlib.pyplot as plt
 import sys
+from operator import itemgetter
 
 class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,argparse.MetavarTypeHelpFormatter):
     pass
@@ -38,11 +39,19 @@ class ReadPlot(object):
     def data(self):
         return self.__data
 
-    def show_stat(self):
+    def show_stat_horizontal(self):
         self.__print_list(pre="players= ",list=self.__players_class_list,form="{}")
         self.__print_list(pre="ave.= ",list=self.__average_list)
         self.__print_list(pre="std.= ",list=self.__std_list)
         self.__print_list(pre="rank= ",list=self.__ranking)
+
+    def show_stat_vertical(self):
+        _stat_list = []
+        for (a,b,c,d) in zip(self.__ranking,self.__players_class_list,self.__average_list,self.__std_list):
+            _stat_list += [[a,b,c,d]]
+        print("{:3}{:15}{:5}{:5}".format("#","Name","ave.","std."))
+        for _list in sorted(_stat_list):
+            print("{0[0]:1}. {0[1]:15}{0[2]:<5.2f}{0[3]:<5.2f}".format(_list))
 
     def __print_list(self,list=[],form="{:.2f}",pre="",post="",sep=", ",header=None):
         if header:
@@ -93,5 +102,5 @@ class ReadPlot(object):
 
 
 stat_inst = ReadPlot(datafile=args.datafile,figfile=args.figfile)
-stat_inst.show_stat()
+stat_inst.show_stat_vertical()
 stat_inst.plot()
