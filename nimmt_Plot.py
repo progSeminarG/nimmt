@@ -32,6 +32,7 @@ class ReadPlot(object):
         # calculate statistic values
         self.__average_list = list(self.__data.mean())
         self.__ranking = sorted(range(self.__num_players),key=lambda k:self.__average_list[k])
+        self.__each_rank = [self.__ranking.index(i) for i in range(self.__num_players)]
         self.__std_list = list(self.__data.std(ddof=False))
         self.__num_games = len(self.__data)
 
@@ -43,11 +44,11 @@ class ReadPlot(object):
         self.__print_list(pre="players= ",list=self.__players_class_list,form="{}")
         self.__print_list(pre="ave.= ",list=self.__average_list)
         self.__print_list(pre="std.= ",list=self.__std_list)
-        self.__print_list(pre="rank= ",list=self.__ranking)
+        self.__print_list(pre="rank= ",list=self.__each_rank)
 
     def show_stat_vertical(self):
         _stat_list = []
-        for (a,b,c,d) in zip(self.__ranking,self.__players_class_list,self.__average_list,self.__std_list):
+        for (a,b,c,d) in zip(self.__each_rank,self.__players_class_list,self.__average_list,self.__std_list):
             _stat_list += [[a,b,c,d]]
         print("{:3}{:15}{:5}{:5}".format("#","Name","ave.","std."))
         for _list in sorted(_stat_list):
