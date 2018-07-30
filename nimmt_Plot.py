@@ -38,6 +38,20 @@ class ReadPlot(object):
     def data(self):
         return self.__data
 
+    def show_stat(self):
+        print("players= ",self.__players_class_list)
+        self.__print_list(pre="players= ",list=self.__players_class_list,form="{}")
+        self.__print_list(pre="ave.= ",list=self.__average_list)
+        self.__print_list(pre="std.= ",list=self.__std_list)
+        self.__print_list(pre="rank= ",list=self.__ranking)
+
+    def __print_list(self,list=[],form="{:.2f}",pre="",post="",sep=", "):
+        _print_text = pre
+        for i in range(len(list)):
+            _print_text += form.format(i) + sep
+        _print_text = _print_text[:-len(sep)] + post
+        print(_print_text)
+
     def plot(self):
         fig, ax = plt.subplots() # create plot space and axis
         plt.rcParams["font.size"] = 7 # font size except ticks
@@ -78,4 +92,5 @@ class ReadPlot(object):
 
 
 stat_inst = ReadPlot(datafile=args.datafile,figfile=args.figfile)
+stat_inst.show_stat()
 stat_inst.plot()
