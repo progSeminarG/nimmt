@@ -1,22 +1,10 @@
 #!/usr/local/bin/python3
 
 import argparse
-import numpy
 import pandas
-import matplotlib
 import matplotlib.pyplot as plt
 import sys
-from operator import itemgetter
 
-class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,argparse.MetavarTypeHelpFormatter):
-    pass
-
-parser = argparse.ArgumentParser(description="Plot score.", formatter_class=CustomFormatter)
-
-parser.add_argument('--file', '--datafile', type=str, dest='datafile', nargs='?', default='stat.csv', help="output file")
-parser.add_argument('--fig', type=str, dest='figfile', nargs='?', default='stat.png', help="output figure file (png)")
-
-args = parser.parse_args()
 
 class ReadPlot(object):
     def __init__(self,datafile="stat.csv",figfile="stat.png"):
@@ -102,6 +90,13 @@ class ReadPlot(object):
         print("data plotted:",self.__figfile)
 
 
-stat_inst = ReadPlot(datafile=args.datafile,figfile=args.figfile)
-stat_inst.show_stat_vertical()
-stat_inst.plot()
+if __name__ == '__main__':
+    class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,argparse.MetavarTypeHelpFormatter):
+        pass
+    parser = argparse.ArgumentParser(description="Plot score.", formatter_class=CustomFormatter)
+    parser.add_argument('--file', '--datafile', type=str, dest='datafile', nargs='?', default='stat.csv', help="output file")
+    parser.add_argument('--fig', type=str, dest='figfile', nargs='?', default='stat.png', help="output figure file (png)")
+    args = parser.parse_args()
+    stat_inst = ReadPlot(datafile=args.datafile,figfile=args.figfile)
+    stat_inst.show_stat_vertical()
+    stat_inst.plot()
