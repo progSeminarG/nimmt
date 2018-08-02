@@ -17,6 +17,7 @@ parser.add_argument('--out', type=str, dest='outfile', nargs='?', default='stat.
 parser.add_argument('--fig', type=str, dest='figfile', nargs='?', default='stat.png', help="output figure file (png)")
 parser.add_argument('-q', '--quiet', action="store_true", help='reduce print sequence')
 
+
 args = parser.parse_args()
 
 @contextlib.contextmanager
