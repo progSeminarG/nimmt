@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#! /usr/bin/env python3
 
 # NUM_GAME (下に定義) の回数一気に python で実行するスクリプト
 #pandasを用いてcsvを解析し，平均順位，1位を取った割合，各々の順位を取った回数を計算する

@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#! /usr/bin/env python3
 import sys
 ### 基本 Player クラス (みんなこれを使えば良い) ###
 class Player(object):
