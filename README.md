@@ -29,6 +29,7 @@
 ## ゲームの実行
 `python3 nimmt_Play.py` : 1 ゲーム実行  
 `python3 nimmt_Play.py --num x` : x ゲーム実行
+`python3 nimmt_Plot.py --file xxx.csv`: xxx.csv を解析してグラフを作成する
 
 ## できるデータ (同名ファイルは上書きされるので注意)
 **stat.csv** (各ゲームの結果: ファイル名は `python3 nimmt_Play.py --out xxx` で変更可能)  
