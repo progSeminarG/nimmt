@@ -134,6 +134,7 @@ for i in range(NUM_GAME):
     with silence(args.quiet):
         game.play()
     progress.update(i)
+progress.finish()
 del game
 _time_finish = time.time()
 _time_spent = _time_finish - _time_start
