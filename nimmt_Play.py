@@ -16,6 +16,7 @@ parser.add_argument('--num', type=int, dest='num_game', nargs='?', default=1, he
 parser.add_argument('--out', type=str, dest='outfile', nargs='?', default='stat.csv', help="output file")
 parser.add_argument('--fig', type=str, dest='figfile', nargs='?', default='stat.png', help="output figure file (png)")
 parser.add_argument('-q', '--quiet', action="store_true", help='reduce print sequence')
+parser.add_argument('--upload', type=str, dest='token', nargs=1, help='upoad figure. parse token.')
 
 
 args = parser.parse_args()
@@ -146,9 +147,18 @@ _time_sec = int(_time_spent)
 print("time spent for {:>d} games: {:>d} h {:>d} min {:>d} sec.".format(NUM_GAME,_time_hour,_time_min,_time_sec))
 print("data saved:",args.outfile)
 
-from nimmt_Plot import ReadPlot
 ### plot data ###
+from nimmt_Plot import ReadPlot
 stat_inst = ReadPlot(datafile=args.outfile,figfile=args.figfile)
 stat_inst.plot()
+
+### upload figure ###
+if args.token:
+    from nimmt_Upload import Uploader
+    uploader_inst = Uploader(fig=args.figfile)
+    uploader_inst.upload(args.token)
+    print("data uploaded:",args.figfile)
+
+
 
 
