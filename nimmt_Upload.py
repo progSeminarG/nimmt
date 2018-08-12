@@ -32,8 +32,12 @@ if __name__ == '__main__':
     parser.add_argument('--channel', type=str, dest='channel', nargs='?', default='C0FJKDWR5', help="chnnel ID")
     parser.add_argument('--filename', type=str, dest='filename', nargs='?', default=None, help="upload file as <filename>")
     parser.add_argument('--title', type=str, dest='title', nargs='?', default=None, help="title of figure")
+    parser.add_argument('--test', action="store_true", help="test mode: upload file to #random")
 
     args = parser.parse_args()
+
+    if args.test:
+        args.channel = "C0FB6UJ9J" # #random channel
     uploader_inst = Uploader(fig=args.figfile,channel=args.channel,filename=args.filename,title=args.title)
     uploader_inst.upload(args.token)
 
