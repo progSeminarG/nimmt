@@ -1,6 +1,7 @@
 import random
 import sys
 import math
+from operator import itemgetter
 
 
 class Player(object):
@@ -22,7 +23,7 @@ class KawadaAI(Player):
     def __init__(self):
         self.all_cards_list = [0]+[1]*104
 
-    def all_cards_kosin(self):
+    def all_cards_kosin(self):  # すべてのカードのリストから既出のカードを削除
         if len(self.my_cards) == 10:
             for i in range(0, len(self.my_cards)):
                 self.all_cards_list[self.my_cards[i]] = 0
@@ -33,15 +34,40 @@ class KawadaAI(Player):
             for i in range(0, self.dealer.num_players):
                 self.all_cards_list[self.dealer.played_cards[i]] = 0
 
+    def cards_risk(self):  # 既出のカードから手持ちのカードの安全性を評価
+        risks = [0]*len(self.my_cards)
+        my_cards_field = [0]*len(self.my_cards)
+        fields_risk = []
+        for i in range(0, len(self.dealer.field)):
+            number = len(self.dealer.field[i])
+            fields_risk.append([self.dealer.field[i][number-1], 6-number-2])
+        fields_risk.sort(key=itemgetter(0))
+        for i in range(0, len(self.my_cards)):  # 手持ちのカードだけ試行
+            for j in range(0, len(self.dealer.field)-1):  # 対象のfieldを探す
+                if self.my_cards[i] > fields_risk[j][0]:
+                    my_cards_field[i] = j+1
+            if my_cards_field[i] == 0:
+                risks[i] = 100
+            else:
+                sum = 0
+                for j in range(my_cards_field[i], self.my_cards[i]):
+                    sum = sum+self.all_cards_list[j]
+                risks[i] = sum-fields_risk[my_cards_field[i]-1][1]
+        return risks
+
     def get_know_dealer(self, dealer_input):  # ディーラーのインスタンスを得る
         self.dealer = dealer_input
 
     def get_hand(self, my_cards_input):  # ディーラー側で呼んで、手札を得る
         self.my_cards = my_cards_input
         self.my_cards = sorted(self.my_cards)
+        print("kawada", self.my_cards)
 
     def put_card(self):  # ディーラー側で呼んで、どのカードを出すか知らせる
+        if len(self.my_cards) == 10:
+            self.all_cards_list = [0]+[1]*104
         self.all_cards_kosin()
+        risks = self.cards_risk()
         field_edge = []  # fieldの端の数字を並べる（ただし5枚以上の場は無視）
         for i in range(4):
             if len(self.dealer.field[i]) < 5:
@@ -80,6 +106,17 @@ class KawadaAI(Player):
             for i in range(0, len(self.my_cards)):
                 if sanbuncheck == 0 and self.my_cards[i] == subpiccard and subpiccard % 5 != 0:
                     ret = i
+        for i in range(0, len(self.my_cards)):
+            if risks[i] == 100:
+                ret = i
+        safety_ans = False
+        for i in range(0, len(self.my_cards)):
+            if risks[len(self.my_cards)-i-1] <= 0:
+                ret = len(self.my_cards)-i-1
+                safety_ans = True
+        for i in range(0, len(self.my_cards)):
+            if safety_ans == False and risks[i] >= 5 and risks[i] <= 10:
+                ret = i
         return self.my_cards.pop(ret)
 
     def taking_column(self):  # 一番小さい数を出したときにディーラー側で呼んで、どの列を引き取るか知らせる
@@ -99,6 +136,20 @@ class KawadaAI(Player):
 
     def get_field(self):  # 場の状況を得る
         self.field = self.dealer.field
+
+'''
+＜仕様の変更＞....2018/10/05
+all_cards_listの作成後、各手持ちカードのriskを数値化
+安全なカードをだす
+無ければ7枚目を狙う
+それもなければfieldより小さい大きいカードで2枚目を狙う
+を追加
+
+今までのメソッドを残すかは今後検討し
+一番小さいカードをどう処理するかも検討
+手持ちのriskが高くて2枚目が狙えないときに出すか
+安全な手持ちでも減点が少ない段階でわざと消費するか
+'''
 
 
 '''
