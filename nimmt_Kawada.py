@@ -23,8 +23,35 @@ class KawadaAI(Player):
     def __init__(self):
         self.all_cards_list = [0]+[1]*104
 
+    def usi_num_of_card(self, card):
+        if card % 55 == 0:
+            return 7
+        elif card % 11 == 0:
+            return 5
+        elif card % 10 == 0:
+            return 3
+        elif card % 5 == 0:
+            return 2
+        else:
+            return 1
+
+    def usi_num_of_list(self, cardslist):
+        score = 0
+        for i in range(len(cardslist)):
+            score = score+self.usi_num_of_card(cardslist[i])
+        return score
+
+    def convert_field_date(self, num):  # [列の端,枚数,列の牛頭,元の列]*4
+        self.converted_field = [0]*4
+        for i in range(len(self.dealer.field)):
+            j = len(self.dealer.field[i])
+            score = self.usi_num_of_list(self.dealer.field[i])
+            self.converted_field[i] = [self.dealer.field[i][j-1], j, score, i]
+        self.converted_field.sort(key=itemgetter(num))
+
     def all_cards_kosin(self):  # すべてのカードのリストから既出のカードを削除
         if len(self.my_cards) == 10:
+            self.all_cards_list = [0]+[1]*104
             for i in range(0, len(self.my_cards)):
                 self.all_cards_list[self.my_cards[i]] = 0
             for i in range(0, len(self.dealer.field)):
@@ -33,6 +60,10 @@ class KawadaAI(Player):
         else:
             for i in range(0, self.dealer.num_players):
                 self.all_cards_list[self.dealer.played_cards[i]] = 0
+
+    # ////////////////////////////////////////////////////////////////////////
+
+
 
     def cards_risk(self):  # 既出のカードから手持ちのカードの安全性を評価
         risks = [0]*len(self.my_cards)
@@ -64,8 +95,6 @@ class KawadaAI(Player):
         print("kawada", self.my_cards)
 
     def put_card(self):  # ディーラー側で呼んで、どのカードを出すか知らせる
-        if len(self.my_cards) == 10:
-            self.all_cards_list = [0]+[1]*104
         self.all_cards_kosin()
         risks = self.cards_risk()
         field_edge = []  # fieldの端の数字を並べる（ただし5枚以上の場は無視）
@@ -120,19 +149,9 @@ class KawadaAI(Player):
         return self.my_cards.pop(ret)
 
     def taking_column(self):  # 一番小さい数を出したときにディーラー側で呼んで、どの列を引き取るか知らせる
-        fieldk = 0
-        for fieldi in range(3):  # フィールドの各枚数を順に比較し枚数が少ない方を取る
-                if len(self.dealer.field[fieldi]) < len(self.dealer.field[fieldk]):
-                    fieldk = fieldi
-                elif len(self.dealer.field[fieldi]) == len(self.dealer.field[fieldk]):  # 枚数が同じときは5の倍数が少ない方を取る
-                    key_cards_counts = [0]*4
-                    for i in range(4):
-                        for k in range(len(self.dealer.field[i])):
-                            if self.dealer.field[i][k] % 5 == 0:
-                                key_cards_counts[i] = key_cards_counts[i]+1
-                    if key_cards_counts[fieldi] < key_cards_counts[fieldk]:
-                        fieldk = fieldi
-        return fieldk
+        self.convert_field_date(2)
+        ret=self.converted_field[0][3]
+        return ret
 
     def get_field(self):  # 場の状況を得る
         self.field = self.dealer.field
